@@ -1,38 +1,55 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
 namespace ShogiClient
 {
     public class Board
     {
-        public Vector2 Position { get; init; }
-        public int TileHorizontalCount { get; init; }
-        public int TileVerticalCount { get; init; }
-        public Vector2 Scale { get; init; } = Vector2.One;
+        public Grid<PieceData> Data { get; private set; }
 
-        public Vector2 Size => GetTileOffsetFor(TileHorizontalCount, TileVerticalCount);
-
-        private GameResources resources;
-
-        public Board(GameResources resources)
+        public Board(int width, int height)
         {
-            this.resources = resources;
+            Data = new Grid<PieceData>(width, height);
+            // The variable is ordered from bottom-up but arrays are accessed from top-to-bottom so it needs to be read in reverse
+            // it makes more sense to this for readability purposes
+            string[] setup = new[] {
+                "PPPPPPPPP",
+                " B     R ",
+                "LNSGKGSNL"
+            };
+
+            for (int y = 0; y < setup.Length; y++)
+            {
+                for (int x = 0; x < Data.Width; x++)
+                {
+                    // Read in reverse, bottom up
+                    char c = setup[setup.Length - y - 1][x];
+                    SetPieceAtWithNotation(x, y, c);
+                    SetPieceAtWithNotation(x, Data.Height - y - 1, c);
+                }
+            }
         }
 
-        public Vector2 GetTileOffsetFor(int x, int y) => new Vector2((32 * Scale.X - 1) * x, (26 * Scale.Y - 1) * y);
-
-        public void Draw(SpriteBatch spriteBatch)
+        private void SetPieceAtWithNotation(int x, int y, char c)
         {
-            for (int y = 0; y < TileVerticalCount; y++)
+            PieceType? maybeType = c switch
             {
-                for (int x = 0; x < TileHorizontalCount; x++)
+                'P' => PieceType.Pawn,
+                'B' => PieceType.Bishop,
+                'R' => PieceType.Rook,
+                'L' => PieceType.Lance,
+                'N' => PieceType.Knight,
+                'S' => PieceType.Silver,
+                'G' => PieceType.Gold,
+                'K' => PieceType.King,
+                ' ' => null,
+                _ => throw new System.Exception("Unknown Piece Type in Setup"),
+            };
+            if (maybeType is PieceType type)
+            {
+                Data.SetAt(x, y, new PieceData()
                 {
-                    // remove 1 from width(32) and height(25) so there isn't a double border between two tiles
-                    // Base position, add the offset for the tile and then center it
-                    var position = Position + GetTileOffsetFor(x, y) - Size / 2;
-
-                    spriteBatch.Draw(resources.Tile, position, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
-                }
+                    Type = type,
+                    Promoted = false,
+                    IsPlayerOne = false,
+                });
             }
         }
     }

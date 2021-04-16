@@ -13,7 +13,7 @@ namespace ShogiClient
 
         private GameResources resources = new GameResources();
 
-        private Board board;
+        private DrawableBoard board;
 
         public Game1()
         {
@@ -25,11 +25,9 @@ namespace ShogiClient
 
         protected override void Initialize()
         {
-            board = new Board(resources)
+            board = new DrawableBoard(resources, 9, 9)
             {
                 Position = WindowSize / 2,
-                TileHorizontalCount = 9,
-                TileVerticalCount = 9,
                 Scale = new Vector2(1.5f, 1.5f),
             };
 
