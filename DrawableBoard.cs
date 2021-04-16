@@ -29,18 +29,22 @@ namespace ShogiClient
                     // Base position, add the offset for the tile and then center it
                     var position = Position + GetTileOffsetFor(x, y) - Size / 2;
 
-                    spriteBatch.Draw(resources.Tile, position, null, Data.GetAt(x, y)?.Type switch
+                    spriteBatch.Draw(resources.Tile, position, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                    if (Data.GetAt(x, y) != null)
                     {
-                        PieceType.Pawn => Color.Red,
-                        PieceType.Bishop => Color.Pink,
-                        PieceType.Knight => Color.Teal,
-                        PieceType.Rook => Color.Yellow,
-                        PieceType.Lance => Color.Turquoise,
-                        PieceType.Gold => Color.Gold,
-                        PieceType.Silver => Color.Silver,
-                        PieceType.King => Color.Green,
-                        _ => Color.White
-                    }, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                        spriteBatch.Draw(resources.Piece, position + new Vector2(resources.Piece.Width / 2, resources.Piece.Width / 4), null, Data.GetAt(x, y).Type switch
+                        {
+                            PieceType.Pawn => Color.Red,
+                            PieceType.Bishop => Color.Pink,
+                            PieceType.Knight => Color.Teal,
+                            PieceType.Rook => Color.Yellow,
+                            PieceType.Lance => Color.Turquoise,
+                            PieceType.Gold => Color.Gold,
+                            PieceType.Silver => Color.Silver,
+                            PieceType.King => Color.Green,
+                            _ => Color.White
+                        }, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                    }
                 }
             }
         }
