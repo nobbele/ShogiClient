@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <Asset Type="Graphics:FontDescription">
+    <FontName>NotoSansCJKjp-DemiLight</FontName>
+    <Size>14</Size>
+    <Spacing>0</Spacing>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+    <CharacterRegions>
+      <CharacterRegion><Start>&#32;</Start><End>&#126;</End></CharacterRegion>
+      <CharacterRegion><Start>&#39321;</Start><End>&#39321;</End></CharacterRegion>
+      <CharacterRegion><Start>&#27497;</Start><End>&#27497;</End></CharacterRegion>
+      <CharacterRegion><Start>&#39131;</Start><End>&#39131;</End></CharacterRegion>
+      <CharacterRegion><Start>&#35282;</Start><End>&#35282;</End></CharacterRegion>
+      <CharacterRegion><Start>&#29579;</Start><End>&#29579;</End></CharacterRegion>
+      <CharacterRegion><Start>&#37329;</Start><End>&#37329;</End></CharacterRegion>
+      <CharacterRegion><Start>&#37504;</Start><End>&#37504;</End></CharacterRegion>
+      <CharacterRegion><Start>&#26690;</Start><End>&#26690;</End></CharacterRegion>
+      <CharacterRegion><Start>&#29577;</Start><End>&#29577;</End></CharacterRegion>
+      <CharacterRegion><Start>&#22317;</Start><End>&#22317;</End></CharacterRegion>
+      <CharacterRegion><Start>&#20840;</Start><End>&#20840;</End></CharacterRegion>
+      <CharacterRegion><Start>&#39340;</Start><End>&#39340;</End></CharacterRegion>
+      <CharacterRegion><Start>&#40845;</Start><End>&#40845;</End></CharacterRegion>
+      <CharacterRegion><Start>&#12392;</Start><End>&#12392;</End></CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>

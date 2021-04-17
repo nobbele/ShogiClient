@@ -5,10 +5,10 @@ namespace ShogiClient
 {
     public class DrawableBoard : Board
     {
-        public Vector2 Position { get; init; }
-        public Vector2 Scale { get; init; } = Vector2.One;
+        public Vector2 Position { get; set; }
+        public Vector2 Scale { get; set; } = Vector2.One;
 
-        public Vector2 Size => GetTileOffsetFor(Data.Width, Data.Height);
+        public Vector2 Size => GetTileOffsetFor(Data.Width - 1, Data.Height - 1);
 
         private GameResources resources;
 
@@ -25,25 +25,36 @@ namespace ShogiClient
             {
                 for (int x = 0; x < Data.Width; x++)
                 {
-                    // remove 1 from width(32) and height(25) so there isn't a double border between two tiles
-                    // Base position, add the offset for the tile and then center it
-                    var position = Position + GetTileOffsetFor(x, y) - Size / 2;
+                    var tilePosition = Position - Size / 2 + GetTileOffsetFor(x, y);
 
-                    spriteBatch.Draw(resources.Tile, position, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
-                    if (Data.GetAt(x, y) != null)
+                    spriteBatch.Draw(resources.Tile, tilePosition - resources.Tile.Bounds.Size.ToVector2() * Scale / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+
+                    var piece = Data.GetAt(x, y);
+                    if (piece != null)
                     {
-                        spriteBatch.Draw(resources.Piece, position + new Vector2(resources.Piece.Width / 2, resources.Piece.Width / 4), null, Data.GetAt(x, y).Type switch
-                        {
-                            PieceType.Pawn => Color.Red,
-                            PieceType.Bishop => Color.Pink,
-                            PieceType.Knight => Color.Teal,
-                            PieceType.Rook => Color.Yellow,
-                            PieceType.Lance => Color.Turquoise,
-                            PieceType.Gold => Color.Gold,
-                            PieceType.Silver => Color.Silver,
-                            PieceType.King => Color.Green,
-                            _ => Color.White
-                        }, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                        spriteBatch.Draw(
+                            resources.Piece,
+                            tilePosition - resources.Piece.Bounds.Size.ToVector2() * Scale / 2,
+                            null,
+                            Color.White,
+                            0,
+                            Vector2.Zero,
+                            Scale,
+                            piece.IsPlayerOne ? SpriteEffects.None : SpriteEffects.FlipVertically,
+                            0
+                        );
+
+                        var piecePrint = Utils.PieceTypeToKanji(piece.Type, piece.IsPlayerOne, piece.Promoted);
+
+                        var piecePrintPosition = tilePosition + (piece.IsPlayerOne ? new Vector2(0, 2) : new Vector2(0, -4)) * Scale;
+
+                        // Can not scale the string as the character will become ugly
+                        spriteBatch.DrawString(
+                            resources.PieceFont,
+                            piecePrint,
+                            piecePrintPosition - resources.PieceFont.MeasureString(piecePrint) / 2,
+                            piece.Promoted ? Color.Red : Color.Black
+                        );
                     }
                 }
             }

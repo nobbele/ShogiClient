@@ -13,6 +13,16 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin File.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:File.spritefont;Piece Font.spritefont
+
+#begin NotoSansCJKjp-DemiLight.otf
+/copy:NotoSansCJKjp-DemiLight.otf
+
 #begin Shogi Piece.png
 /importer:TextureImporter
 /processor:TextureProcessor

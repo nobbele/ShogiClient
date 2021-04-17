@@ -18,6 +18,7 @@ namespace ShogiClient
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             Window.AllowUserResizing = false;
@@ -25,10 +26,14 @@ namespace ShogiClient
 
         protected override void Initialize()
         {
+            graphics.PreferredBackBufferWidth = 1366;
+            graphics.PreferredBackBufferHeight = 768;
+            graphics.ApplyChanges();
+
             board = new DrawableBoard(resources, 9, 9)
             {
                 Position = WindowSize / 2,
-                Scale = new Vector2(1.5f, 1.5f),
+                Scale = new Vector2(2f, 2f),
             };
 
             base.Initialize();
