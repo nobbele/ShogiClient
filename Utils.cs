@@ -41,7 +41,7 @@ namespace ShogiClient
             PieceType.Silver => true,
             PieceType.Gold => false,
             PieceType.King => false,
-            _ => throw new System.Exception("Unknown Piece Typep"),
+            _ => throw new System.Exception("Unknown Piece Type"),
         };
 
         public static string[] PieceTypeMoveSet(PieceType type, bool isPromoted) => type switch
@@ -88,7 +88,7 @@ namespace ShogiClient
                 "S.S",
                 "SSS"
             },
-            _ => throw new System.Exception("Unknown Piece Typep"),
+            _ => throw new System.Exception("Unknown Piece Type"),
         };
 
         public static List<(int X, int Y)> ValidMovesForPiece(
