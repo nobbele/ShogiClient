@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -50,9 +51,54 @@ namespace ShogiClient
         protected override void Update(GameTime gameTime)
         {
             var keyboardState = Keyboard.GetState();
+            var mouseState = Mouse.GetState();
 
             if (keyboardState.IsKeyDown(Keys.Escape))
                 Exit();
+
+            if (mouseState.LeftButton == ButtonState.Pressed)
+            {
+                if (board.HeldPiece == null)
+                {
+                    var positionOnBoard = mouseState.Position.ToVector2() - board.Position + board.Size / 2 + board.TileSize / 2;
+                    int tileX = (int)Math.Floor(positionOnBoard.X / board.TileSize.X);
+                    int tileY = (int)Math.Floor(positionOnBoard.Y / board.TileSize.Y);
+
+                    if (tileX >= 0 && tileX < board.Data.Width && tileY >= 0 && tileY < board.Data.Height)
+                    {
+                        if (board.PickUpPiece(tileX, tileY, true))
+                        {
+                            Console.WriteLine("Picked up piece");
+                            board.HeldPiecePickUpPosition = (tileX, tileY);
+                        }
+                    }
+                }
+
+                if (board.HeldPiece != null)
+                {
+                    board.HeldPiecePosition = mouseState.Position.ToVector2();
+                }
+
+            }
+
+            if (mouseState.LeftButton == ButtonState.Released && board.HeldPiece != null)
+            {
+                var positionOnBoard = board.HeldPiecePosition - board.Position + board.Size / 2 + board.TileSize / 2;
+                int tileX = (int)Math.Floor(positionOnBoard.X / board.TileSize.X);
+                int tileY = (int)Math.Floor(positionOnBoard.Y / board.TileSize.Y);
+
+                if (tileX >= 0 && tileX < board.Data.Width
+                    && tileY >= 0 && tileY < board.Data.Height
+                    && board.PlacePiece(tileX, tileY, true, out PieceType? captured))
+                {
+                    Console.WriteLine($"Piece was placed, captured: {captured != null}");
+
+                }
+                else
+                {
+                    board.PlacePiece(board.HeldPiecePickUpPosition.X, board.HeldPiecePickUpPosition.Y);
+                }
+            }
 
             base.Update(gameTime);
         }

@@ -3,6 +3,49 @@ namespace ShogiClient
     public class Board
     {
         public Grid<PieceData> Data { get; private set; }
+        public PieceData HeldPiece { get; private set; }
+
+        /// <summary>
+        ///   Removes a piece from the board and puts it in the HeldPiece property.
+        /// </summary>
+        public bool PickUpPiece(int x, int y, bool isPlayerOne)
+        {
+            var piece = Data.GetAt(x, y);
+            if (piece == null || piece.IsPlayerOne != isPlayerOne)
+                return false;
+            Data.SetAt(x, y, null);
+            HeldPiece = piece;
+            return true;
+        }
+
+        /// <summary>
+        ///   Removes a piece from the board and puts it in the HeldPiece property.
+        /// </summary>
+        public bool PlacePiece(int x, int y, bool isPlayerOne, out PieceType? captured)
+        {
+            captured = null;
+
+            var piece = Data.GetAt(x, y);
+            if (piece != null)
+            {
+                if (piece.IsPlayerOne == isPlayerOne)
+                {
+                    return false;
+                }
+                else
+                {
+                    captured = piece.Type;
+                }
+            }
+            PlacePiece(x, y);
+            return true;
+        }
+
+        public void PlacePiece(int x, int y)
+        {
+            Data.SetAt(x, y, HeldPiece);
+            HeldPiece = null;
+        }
 
         public Board(int width, int height)
         {
