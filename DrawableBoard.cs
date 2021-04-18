@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -23,7 +25,7 @@ namespace ShogiClient
 
         public Vector2 GetTileOffsetFor(int x, int y) => new Vector2((TileSize.X - 1) * x, (TileSize.Y - 1) * y);
 
-        public void DrawPiece(SpriteBatch spriteBatch, PieceData piece, Vector2 tilePosition)
+        private void DrawPiece(SpriteBatch spriteBatch, PieceData piece, Vector2 tilePosition)
         {
             spriteBatch.Draw(
                 resources.Piece,
@@ -70,6 +72,16 @@ namespace ShogiClient
 
             if (HeldPiece != null)
             {
+                var validMoves = Utils.ValidMovesForPiece(HeldPiece, Data, HeldPiecePickUpPosition.X, HeldPiecePickUpPosition.Y, HeldPiece.IsPlayerOne);
+
+                foreach (var validMove in validMoves)
+                {
+                    var indicatorPosition = Position
+                        - Size / 2
+                        + GetTileOffsetFor(validMove.X, validMove.Y);
+                    spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                }
+
                 DrawPiece(spriteBatch, HeldPiece, HeldPiecePosition);
             }
         }

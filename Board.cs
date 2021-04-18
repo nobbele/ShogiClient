@@ -21,11 +21,16 @@ namespace ShogiClient
         /// <summary>
         ///   Removes a piece from the board and puts it in the HeldPiece property.
         /// </summary>
-        public bool PlacePiece(int x, int y, bool isPlayerOne, out PieceType? captured)
+        public bool PlacePiece(int fromX, int fromY, int targetX, int targetY, bool isPlayerOne, out PieceType? captured)
         {
             captured = null;
 
-            var piece = Data.GetAt(x, y);
+            if (!Utils.ValidMovesForPiece(HeldPiece, Data, fromX, fromY, isPlayerOne).Contains((targetX, targetY)))
+            {
+                return false;
+            }
+
+            var piece = Data.GetAt(targetX, targetY);
             if (piece != null)
             {
                 if (piece.IsPlayerOne == isPlayerOne)
@@ -37,7 +42,7 @@ namespace ShogiClient
                     captured = piece.Type;
                 }
             }
-            PlacePiece(x, y);
+            PlacePiece(targetX, targetY);
             return true;
         }
 
@@ -70,7 +75,7 @@ namespace ShogiClient
                         Data.SetAt(x, y, new PieceData()
                         {
                             Type = type,
-                            Promoted = true,
+                            Promoted = false,
                             IsPlayerOne = false,
                         });
                         Data.SetAt(Data.Width - x - 1, Data.Height - y - 1, new PieceData()

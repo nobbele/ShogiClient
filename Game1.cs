@@ -15,6 +15,7 @@ namespace ShogiClient
         private GameResources resources = new GameResources();
 
         private DrawableBoard board;
+        private bool isPlayerOneTurn = true;
 
         public Game1()
         {
@@ -66,7 +67,7 @@ namespace ShogiClient
 
                     if (tileX >= 0 && tileX < board.Data.Width && tileY >= 0 && tileY < board.Data.Height)
                     {
-                        if (board.PickUpPiece(tileX, tileY, true))
+                        if (board.PickUpPiece(tileX, tileY, isPlayerOneTurn))
                         {
                             Console.WriteLine("Picked up piece");
                             board.HeldPiecePickUpPosition = (tileX, tileY);
@@ -89,9 +90,10 @@ namespace ShogiClient
 
                 if (tileX >= 0 && tileX < board.Data.Width
                     && tileY >= 0 && tileY < board.Data.Height
-                    && board.PlacePiece(tileX, tileY, true, out PieceType? captured))
+                    && board.PlacePiece(board.HeldPiecePickUpPosition.X, board.HeldPiecePickUpPosition.Y, tileX, tileY, isPlayerOneTurn, out PieceType? captured))
                 {
                     Console.WriteLine($"Piece was placed, captured: {captured != null}");
+                    isPlayerOneTurn = !isPlayerOneTurn;
 
                 }
                 else

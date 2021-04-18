@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ShogiClient
 {
     public static class Utils
@@ -41,5 +43,117 @@ namespace ShogiClient
             PieceType.King => false,
             _ => throw new System.Exception("Unknown Piece Typep"),
         };
+
+        public static string[] PieceTypeMoveSet(PieceType type, bool isPromoted) => type switch
+        {
+            PieceType.Pawn => new string[] {
+                " S ",
+                " . ",
+                "   ",
+            },
+            PieceType.Bishop => new string[] {
+                "M M",
+                " . ",
+                "M M",
+            },
+            PieceType.Rook => new string[] {
+                " M ",
+                "M.M",
+                " M ",
+            },
+            PieceType.Lance => new string[] {
+                " M ",
+                " . ",
+                "   ",
+            },
+            PieceType.Knight => new string[] {
+                "J J",
+                "   ",
+                " . ",
+                "   ",
+                "   "
+            },
+            PieceType.Silver => new string[] {
+                "SSS",
+                " . ",
+                "S S",
+            },
+            PieceType.Gold => new string[] {
+                "SSS",
+                "S.S",
+                " S ",
+            },
+            PieceType.King => new string[] {
+                "SSS",
+                "S.S",
+                "SSS"
+            },
+            _ => throw new System.Exception("Unknown Piece Typep"),
+        };
+
+        public static List<(int X, int Y)> ValidMovesForPiece(
+            PieceData piece,
+            Grid<PieceData> board,
+            int currentX,
+            int currentY,
+            bool isPlayerOne)
+        {
+            var moveSet = Utils.PieceTypeMoveSet(piece.Type, piece.Promoted);
+            (int X, int Y) center = (-1, -1);
+            for (int y = 0; y < moveSet.Length; y++)
+            {
+                int x = moveSet[y].IndexOf('.');
+                if (x != -1)
+                {
+                    center = (x, y);
+                    break;
+                }
+            }
+
+            //TODO Validate center
+
+            var validMoves = new List<(int X, int Y)>();
+            for (int y = 0; y < moveSet.Length; y++)
+            {
+                for (int x = 0; x < moveSet[y].Length; x++)
+                {
+                    char c = moveSet[y][x];
+                    if (c != ' ')
+                    {
+                        var localPosition = SidedOffsetToGlobalOffset(center.X, center.Y, x, y, isPlayerOne);
+                        (int X, int Y) positionOnBoard = (
+                            currentX + localPosition.X,
+                            currentY + localPosition.Y
+                        );
+                        if (positionOnBoard.X >= 0 && positionOnBoard.X < board.Width
+                            && positionOnBoard.Y >= 0 && positionOnBoard.Y < board.Height)
+                        {
+                            var pieceAtPosition = board.GetAt(positionOnBoard.X, positionOnBoard.Y);
+                            var occupiedTile = pieceAtPosition != null && pieceAtPosition.IsPlayerOne == piece.IsPlayerOne;
+
+                            if (c == 'J' || c == 'S')
+                            {
+                                if (!occupiedTile)
+                                    validMoves.Add(positionOnBoard);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return validMoves;
+        }
+
+        public static (int X, int Y) SidedOffsetToGlobalOffset(int centerX, int centerY, int x, int y, bool isPlayerOne)
+        {
+            if (isPlayerOne)
+            {
+                return (-(centerX - x), -(centerY - y));
+            }
+            else
+            {
+                return (centerX - x, centerY - y);
+            }
+        }
     }
 }
