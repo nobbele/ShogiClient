@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -10,11 +11,12 @@ namespace ShogiClient
         public Vector2 Position { get; set; }
         public Vector2 Scale { get; set; } = Vector2.One;
 
-        public Vector2 Size => GetTileOffsetFor(Data.Width - 1, Data.Height - 1);
-        public Vector2 TileSize => new Vector2(32 * Scale.X, 26 * Scale.Y);
+        public Vector2 Size => GetTileOffsetFor(Data.Width - 1, Data.Height - 1) + TileSize;
+        public Vector2 TileSize => resources.Tile.Bounds.Size.ToVector2() * Scale;
 
         public Vector2 HeldPiecePosition { get; set; } = new Vector2(0, 0);
-        public (int X, int Y) HeldPiecePickUpPosition { get; set; } = (0, 0);
+        // If null, that means it's taken from the hand
+        public (int X, int Y)? HeldPiecePickUpPosition { get; set; } = null;
 
         private GameResources resources;
 
@@ -24,6 +26,16 @@ namespace ShogiClient
         }
 
         public Vector2 GetTileOffsetFor(int x, int y) => new Vector2((TileSize.X - 1) * x, (TileSize.Y - 1) * y);
+
+        public (int X, int Y) GetTileForCoordinate(Vector2 position)
+        {
+            var topLeft = Position - Size / 2 - TileSize / 2;
+            var positionOnBoard = position - topLeft;
+            int tileX = (int)Math.Floor(positionOnBoard.X / TileSize.X);
+            int tileY = (int)Math.Floor(positionOnBoard.Y / TileSize.Y);
+
+            return (tileX, tileY);
+        }
 
         private void DrawPiece(SpriteBatch spriteBatch, PieceData piece, Vector2 tilePosition)
         {
@@ -72,14 +84,17 @@ namespace ShogiClient
 
             if (HeldPiece != null)
             {
-                var validMoves = Utils.ValidMovesForPiece(HeldPiece, Data, HeldPiecePickUpPosition.X, HeldPiecePickUpPosition.Y, HeldPiece.IsPlayerOne);
-
-                foreach (var validMove in validMoves)
+                if (HeldPiecePickUpPosition is (int, int) pickUpPosition)
                 {
-                    var indicatorPosition = Position
-                        - Size / 2
-                        + GetTileOffsetFor(validMove.X, validMove.Y);
-                    spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                    var validMoves = Utils.ValidMovesForPiece(HeldPiece, Data, pickUpPosition.X, pickUpPosition.Y, HeldPiece.IsPlayerOne);
+
+                    foreach (var validMove in validMoves)
+                    {
+                        var indicatorPosition = Position
+                            - Size / 2
+                            + GetTileOffsetFor(validMove.X, validMove.Y);
+                        spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                    }
                 }
 
                 DrawPiece(spriteBatch, HeldPiece, HeldPiecePosition);

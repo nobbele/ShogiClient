@@ -3,7 +3,7 @@ namespace ShogiClient
     public class Board
     {
         public Grid<PieceData> Data { get; private set; }
-        public PieceData HeldPiece { get; private set; }
+        public PieceData HeldPiece { get; set; }
 
         /// <summary>
         ///   Removes a piece from the board and puts it in the HeldPiece property.
@@ -19,7 +19,7 @@ namespace ShogiClient
         }
 
         /// <summary>
-        ///   Removes a piece from the board and puts it in the HeldPiece property.
+        ///   Removes a piece from the HeldPiece property and puts it on the board.
         /// </summary>
         public bool PlacePiece(int fromX, int fromY, int targetX, int targetY, bool isPlayerOne, out PieceType? captured)
         {
@@ -45,6 +45,26 @@ namespace ShogiClient
             PlacePiece(targetX, targetY);
             return true;
         }
+
+        /// <summary>
+        ///   Removes a piece from the hand and puts it on the board.
+        /// </summary>
+        public bool PlacePieceFromHand(int targetX, int targetY)
+        {
+            if (HeldPiece.Type == PieceType.Pawn)
+            {
+                // TODO Check two pawn place and pawn mate
+            }
+
+            var piece = Data.GetAt(targetX, targetY);
+            if (piece != null)
+            {
+                return false;
+            }
+            PlacePiece(targetX, targetY);
+            return true;
+        }
+
 
         public void PlacePiece(int x, int y)
         {

@@ -9,13 +9,21 @@ namespace ShogiClient
     {
         public Vector2 WindowSize => Window.ClientBounds.Size.ToVector2();
 
+        public PlayerData CurrentPlayer => isPlayerOneTurn ? playerOne : playerTwo;
+
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
         private GameResources resources = new GameResources();
 
         private DrawableBoard board;
+        private DrawableHand playerOneHand;
+        private DrawableHand playerTwoHand;
+        private DrawableHand currentPlayerHand => isPlayerOneTurn ? playerOneHand : playerTwoHand;
+
         private bool isPlayerOneTurn = true;
+        private PlayerData playerOne = new PlayerData();
+        private PlayerData playerTwo = new PlayerData();
 
         public Game1()
         {
@@ -38,6 +46,20 @@ namespace ShogiClient
                 Scale = new Vector2(2f, 2f),
             };
 
+            playerOneHand = new DrawableHand(resources)
+            {
+                PlayerData = playerOne,
+                Position = new Vector2(WindowSize.X / 2, WindowSize.Y - 50),
+                Scale = new Vector2(1.5f)
+            };
+
+            playerTwoHand = new DrawableHand(resources)
+            {
+                PlayerData = playerTwo,
+                Position = new Vector2(WindowSize.X / 2, 50),
+                Scale = new Vector2(1.5f)
+            };
+
             base.Initialize();
         }
 
@@ -53,53 +75,106 @@ namespace ShogiClient
         {
             var keyboardState = Keyboard.GetState();
             var mouseState = Mouse.GetState();
+            var mousePosition = mouseState.Position.ToVector2();
 
             if (keyboardState.IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (mouseState.LeftButton == ButtonState.Pressed)
+            var boardIndex = board.GetTileForCoordinate(mousePosition);
+            var currentHandIndex = currentPlayerHand.GetIndexForCoordinate(mousePosition);
+            if (mouseState.LeftButton == ButtonState.Pressed && board.HeldPiece == null)
             {
-                if (board.HeldPiece == null)
+                if (
+                    boardIndex.X >= 0 && boardIndex.X < board.Data.Width
+                    && boardIndex.Y >= 0 && boardIndex.Y < board.Data.Height)
                 {
-                    var positionOnBoard = mouseState.Position.ToVector2() - board.Position + board.Size / 2 + board.TileSize / 2;
-                    int tileX = (int)Math.Floor(positionOnBoard.X / board.TileSize.X);
-                    int tileY = (int)Math.Floor(positionOnBoard.Y / board.TileSize.Y);
 
-                    if (tileX >= 0 && tileX < board.Data.Width && tileY >= 0 && tileY < board.Data.Height)
+                    if (board.PickUpPiece(boardIndex.X, boardIndex.Y, isPlayerOneTurn))
                     {
-                        if (board.PickUpPiece(tileX, tileY, isPlayerOneTurn))
-                        {
-                            Console.WriteLine("Picked up piece");
-                            board.HeldPiecePickUpPosition = (tileX, tileY);
-                        }
+                        Console.WriteLine("Picked up piece");
+                        board.HeldPiecePickUpPosition = (boardIndex.X, boardIndex.Y);
                     }
                 }
-
-                if (board.HeldPiece != null)
+                else
                 {
-                    board.HeldPiecePosition = mouseState.Position.ToVector2();
+                    if (currentHandIndex.X >= 0 && currentHandIndex.X < CurrentPlayer.Hand.Count
+                    && currentHandIndex.Y == 0)
+                    {
+                        var idx = currentHandIndex.X;
+                        var pieceType = CurrentPlayer.Hand[idx];
+                        CurrentPlayer.Hand.RemoveAt(idx);
+                        board.HeldPiece = new PieceData()
+                        {
+                            Type = pieceType,
+                            Promoted = false,
+                            IsPlayerOne = isPlayerOneTurn,
+                        };
+                        board.HeldPiecePickUpPosition = null;
+                    }
                 }
-
             }
 
             if (mouseState.LeftButton == ButtonState.Released && board.HeldPiece != null)
             {
-                var positionOnBoard = board.HeldPiecePosition - board.Position + board.Size / 2 + board.TileSize / 2;
-                int tileX = (int)Math.Floor(positionOnBoard.X / board.TileSize.X);
-                int tileY = (int)Math.Floor(positionOnBoard.Y / board.TileSize.Y);
-
-                if (tileX >= 0 && tileX < board.Data.Width
-                    && tileY >= 0 && tileY < board.Data.Height
-                    && board.PlacePiece(board.HeldPiecePickUpPosition.X, board.HeldPiecePickUpPosition.Y, tileX, tileY, isPlayerOneTurn, out PieceType? captured))
+                bool failedToPlace = false;
+                if (boardIndex.X >= 0 && boardIndex.X < board.Data.Width
+                    && boardIndex.Y >= 0 && boardIndex.Y < board.Data.Height)
                 {
-                    Console.WriteLine($"Piece was placed, captured: {captured != null}");
-                    isPlayerOneTurn = !isPlayerOneTurn;
+                    if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                    {
+                        if (board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, isPlayerOneTurn, out PieceType? captured))
+                        {
+                            Console.WriteLine($"Piece was placed, captured: {captured != null}");
+                            // If there was a captured piece, not null
+                            if (captured is PieceType type)
+                            {
+                                CurrentPlayer.Hand.Add(type);
+                            }
+                            isPlayerOneTurn = !isPlayerOneTurn;
 
+                        }
+                        else
+                        {
+                            failedToPlace = true;
+
+                        }
+                    }
+                    else
+                    {
+                        if (board.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
+                        {
+                            Console.WriteLine("Piece placed from hand");
+                            isPlayerOneTurn = !isPlayerOneTurn;
+                        }
+                        else
+                        {
+                            failedToPlace = true;
+
+                        }
+                    }
                 }
                 else
                 {
-                    board.PlacePiece(board.HeldPiecePickUpPosition.X, board.HeldPiecePickUpPosition.Y);
+                    failedToPlace = true;
                 }
+
+                if (failedToPlace)
+                {
+                    if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                    {
+                        board.PlacePiece(pickUpPosition.X, pickUpPosition.Y);
+                    }
+                    else
+                    {
+                        CurrentPlayer.Hand.Add(board.HeldPiece.Type);
+                        board.HeldPiece = null;
+                    }
+                }
+            }
+
+            if (board.HeldPiece != null)
+            {
+                board.HeldPiecePosition = mousePosition;
             }
 
             base.Update(gameTime);
@@ -112,6 +187,8 @@ namespace ShogiClient
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 
             board.Draw(spriteBatch);
+            playerOneHand.Draw(spriteBatch);
+            playerTwoHand.Draw(spriteBatch);
 
             spriteBatch.End();
 
