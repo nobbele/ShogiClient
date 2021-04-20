@@ -92,13 +92,13 @@ namespace ShogiClient
 
                     if (Utils.PieceNotationToPieceType(c) is PieceType type)
                     {
-                        Data.SetAt(x, y, new PieceData()
+                        Data.SetAt(Data.Width - x - 1, y, new PieceData()
                         {
                             Type = type,
                             Promoted = false,
                             IsPlayerOne = false,
                         });
-                        Data.SetAt(Data.Width - x - 1, Data.Height - y - 1, new PieceData()
+                        Data.SetAt(x, Data.Height - y - 1, new PieceData()
                         {
                             Type = type,
                             Promoted = false,

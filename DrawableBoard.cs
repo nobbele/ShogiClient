@@ -79,6 +79,13 @@ namespace ShogiClient
                     {
                         DrawPiece(spriteBatch, piece, tilePosition);
                     }
+
+#pragma warning disable CS0162
+                    if (Game1.DEBUG_DISPLAY)
+                    {
+                        spriteBatch.DrawString(resources.PieceFont, $"{x},{y}", tilePosition - resources.Tile.Bounds.Size.ToVector2() * Scale / 2, Color.Snow);
+                    }
+#pragma warning restore CS0162
                 }
             }
 

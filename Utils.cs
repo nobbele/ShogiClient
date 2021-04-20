@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ShogiClient
@@ -110,7 +111,10 @@ namespace ShogiClient
                 }
             }
 
-            //TODO Validate center
+            if (center.X == -1 || center.Y == -1)
+            {
+                throw new System.Exception("Invalid center");
+            }
 
             var validMoves = new List<(int X, int Y)>();
             for (int y = 0; y < moveSet.Length; y++)
@@ -131,10 +135,20 @@ namespace ShogiClient
                             var pieceAtPosition = board.GetAt(positionOnBoard.X, positionOnBoard.Y);
                             var occupiedTile = pieceAtPosition != null && pieceAtPosition.IsPlayerOne == piece.IsPlayerOne;
 
+                            // Since there's no distant non-jumping S, we can treat them as the same
                             if (c == 'J' || c == 'S')
                             {
                                 if (!occupiedTile)
                                     validMoves.Add(positionOnBoard);
+                            }
+                            else if (c == 'M')
+                            {
+                                validMoves.AddRange(RayCastPathForMovement(
+                                    currentX, currentY,
+                                    localPosition.X, localPosition.Y,
+                                    isPlayerOne,
+                                    board
+                                ));
                             }
                         }
                     }
@@ -144,7 +158,7 @@ namespace ShogiClient
             return validMoves;
         }
 
-        public static (int X, int Y) SidedOffsetToGlobalOffset(int centerX, int centerY, int x, int y, bool isPlayerOne)
+        private static (int X, int Y) SidedOffsetToGlobalOffset(int centerX, int centerY, int x, int y, bool isPlayerOne)
         {
             if (isPlayerOne)
             {
@@ -154,6 +168,53 @@ namespace ShogiClient
             {
                 return (centerX - x, centerY - y);
             }
+        }
+
+        private static List<(int X, int Y)> RayCastPathForMovement(
+            int currentX, int currentY,
+            int directionX, int directionY,
+            bool isPlayerOne,
+            Grid<PieceData> board)
+        {
+            var validMoves = new List<(int X, int Y)>();
+            var yRatio = Math.Abs(directionX == 0 ? 0 : directionY / directionX);
+            var xSign = Math.Sign(directionX);
+            var ySign = Math.Sign(directionY);
+
+            PieceData prevRayPoint = null;
+            for (int x = Math.Abs(directionX); true; x++)
+            {
+                var y = directionX == 0 ? x + 1 : x * yRatio;
+
+                var targetX = currentX + x * xSign;
+                var targetY = currentY + y * ySign;
+
+                if (targetX < 0 || targetX >= board.Width
+                    || targetY < 0 || targetY >= board.Height)
+                {
+                    break;
+                }
+
+                var pieceAtRayPoint = board.GetAt(targetX, targetY);
+
+                bool canReach = true;
+                if (pieceAtRayPoint != null && pieceAtRayPoint.IsPlayerOne == isPlayerOne
+                        || prevRayPoint != null)
+                {
+                    canReach = false;
+                }
+
+                if (!canReach)
+                {
+                    break;
+
+                }
+
+                validMoves.Add((targetX, targetY));
+                prevRayPoint = pieceAtRayPoint;
+            }
+
+            return validMoves;
         }
     }
 }

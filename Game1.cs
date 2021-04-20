@@ -7,9 +7,17 @@ namespace ShogiClient
 {
     public class Game1 : Game
     {
+        public const bool DEBUG_PLAYERONE = false;
+        public const bool DEBUG_DISPLAY = false;
+
         public Vector2 WindowSize => Window.ClientBounds.Size.ToVector2();
 
         public PlayerData CurrentPlayer => isPlayerOneTurn ? playerOne : playerTwo;
+        public bool IsPlayerOneTurn
+        {
+            get => DEBUG_PLAYERONE ? true : isPlayerOneTurn;
+            set => isPlayerOneTurn = value;
+        }
 
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
@@ -89,9 +97,8 @@ namespace ShogiClient
                     && boardIndex.Y >= 0 && boardIndex.Y < board.Data.Height)
                 {
 
-                    if (board.PickUpPiece(boardIndex.X, boardIndex.Y, isPlayerOneTurn))
+                    if (board.PickUpPiece(boardIndex.X, boardIndex.Y, IsPlayerOneTurn))
                     {
-                        Console.WriteLine("Picked up piece");
                         board.HeldPiecePickUpPosition = (boardIndex.X, boardIndex.Y);
                     }
                 }
@@ -107,7 +114,7 @@ namespace ShogiClient
                         {
                             Type = pieceType,
                             Promoted = false,
-                            IsPlayerOne = isPlayerOneTurn,
+                            IsPlayerOne = IsPlayerOneTurn,
                         };
                         board.HeldPiecePickUpPosition = null;
                     }
@@ -122,15 +129,14 @@ namespace ShogiClient
                 {
                     if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
-                        if (board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, isPlayerOneTurn, out PieceType? captured))
+                        if (board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, IsPlayerOneTurn, out PieceType? captured))
                         {
-                            Console.WriteLine($"Piece was placed, captured: {captured != null}");
                             // If there was a captured piece, not null
                             if (captured is PieceType type)
                             {
                                 CurrentPlayer.Hand.Add(type);
                             }
-                            isPlayerOneTurn = !isPlayerOneTurn;
+                            IsPlayerOneTurn = !IsPlayerOneTurn;
 
                         }
                         else
@@ -143,8 +149,7 @@ namespace ShogiClient
                     {
                         if (board.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
                         {
-                            Console.WriteLine("Piece placed from hand");
-                            isPlayerOneTurn = !isPlayerOneTurn;
+                            IsPlayerOneTurn = !IsPlayerOneTurn;
                         }
                         else
                         {
