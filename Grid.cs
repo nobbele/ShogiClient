@@ -20,5 +20,10 @@ namespace ShogiClient
 
         public T GetAt(int x, int y) => Data[y][x];
         public void SetAt(int x, int y, T data) => Data[y][x] = data;
+
+        // Ignores checking if either is 0
+        public bool AreIndicesWithinBounds(int x, int y) =>
+            x >= 0 && x < Width
+            && y >= 0 && y < Height;
     }
 }

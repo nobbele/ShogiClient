@@ -21,12 +21,12 @@ namespace ShogiClient
 
         public static string PieceTypeToKanji(PieceType type, bool isPlayerOne, bool isPromoted) => type switch
         {
-            PieceType.Pawn => isPromoted ? "と" : "歩",
-            PieceType.Bishop => isPromoted ? "馬" : "角",
-            PieceType.Rook => isPromoted ? "龍" : "飛",
-            PieceType.Lance => isPromoted ? "香" : "香",
-            PieceType.Knight => isPromoted ? "圭" : "桂",
-            PieceType.Silver => isPromoted ? "全" : "銀",
+            PieceType.Pawn => !isPromoted ? "歩" : "と",
+            PieceType.Bishop => !isPromoted ? "角" : "馬",
+            PieceType.Rook => !isPromoted ? "飛" : "龍",
+            PieceType.Lance => !isPromoted ? "香" : "香",
+            PieceType.Knight => !isPromoted ? "桂" : "圭",
+            PieceType.Silver => !isPromoted ? "銀" : "全",
             PieceType.Gold => "金",
             PieceType.King => isPlayerOne ? "玉" : "王",
             _ => throw new System.Exception("Unknown Piece Type"),
@@ -47,37 +47,61 @@ namespace ShogiClient
 
         public static string[] PieceTypeMoveSet(PieceType type, bool isPromoted) => type switch
         {
-            PieceType.Pawn => new string[] {
+            PieceType.Pawn => !isPromoted ? new string[] {
                 " S ",
                 " . ",
                 "   ",
+            } : new string[] {
+                "SSS",
+                "S.S",
+                " S ",
             },
-            PieceType.Bishop => new string[] {
+            PieceType.Bishop => !isPromoted ? new string[] {
                 "M M",
                 " . ",
                 "M M",
+            } : new string[] {
+                "MSM",
+                "S.S",
+                "MSM",
             },
-            PieceType.Rook => new string[] {
+            PieceType.Rook => !isPromoted ? new string[] {
                 " M ",
                 "M.M",
                 " M ",
+            } : new string[] {
+                "SMS",
+                "M.M",
+                "SMS",
             },
-            PieceType.Lance => new string[] {
+            PieceType.Lance => !isPromoted ? new string[] {
                 " M ",
                 " . ",
                 "   ",
+            } : new string[] {
+                "SSS",
+                "S.S",
+                " S ",
             },
-            PieceType.Knight => new string[] {
+            PieceType.Knight => !isPromoted ? new string[] {
                 "J J",
                 "   ",
                 " . ",
                 "   ",
                 "   "
+            } : new string[] {
+                "SSS",
+                "S.S",
+                " S ",
             },
-            PieceType.Silver => new string[] {
+            PieceType.Silver => !isPromoted ? new string[] {
                 "SSS",
                 " . ",
                 "S S",
+            } : new string[] {
+                "SSS",
+                "S.S",
+                " S ",
             },
             PieceType.Gold => new string[] {
                 "SSS",
@@ -129,8 +153,7 @@ namespace ShogiClient
                             currentX + localPosition.X,
                             currentY + localPosition.Y
                         );
-                        if (positionOnBoard.X >= 0 && positionOnBoard.X < board.Width
-                            && positionOnBoard.Y >= 0 && positionOnBoard.Y < board.Height)
+                        if (board.AreIndicesWithinBounds(positionOnBoard.X, positionOnBoard.Y))
                         {
                             var pieceAtPosition = board.GetAt(positionOnBoard.X, positionOnBoard.Y);
                             var occupiedTile = pieceAtPosition != null && pieceAtPosition.IsPlayerOne == piece.IsPlayerOne;
@@ -189,8 +212,7 @@ namespace ShogiClient
                 var targetX = currentX + x * xSign;
                 var targetY = currentY + y * ySign;
 
-                if (targetX < 0 || targetX >= board.Width
-                    || targetY < 0 || targetY >= board.Height)
+                if (!board.AreIndicesWithinBounds(targetX, targetY))
                 {
                     break;
                 }

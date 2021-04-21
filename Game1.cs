@@ -125,8 +125,7 @@ namespace ShogiClient
             {
                 bool failedToPlace = false;
 
-                if (boardIndex.X >= 0 && boardIndex.X < board.Data.Width
-                    && boardIndex.Y >= 0 && boardIndex.Y < board.Data.Height)
+                if (board.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
                 {
                     if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
@@ -167,6 +166,7 @@ namespace ShogiClient
                     }
                     if (indexToPromotionRow >= 0)
                     {
+                        // Always promote, for now
                         var promotePiece = board.Data.GetAt(boardIndex.X, boardIndex.Y);
                         if (Utils.CanPromotePieceType(promotePiece.Type))
                             board.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
