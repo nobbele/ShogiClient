@@ -124,37 +124,30 @@ namespace ShogiClient
             if (mouseState.LeftButton == ButtonState.Released && board.HeldPiece != null)
             {
                 bool failedToPlace = false;
+
                 if (boardIndex.X >= 0 && boardIndex.X < board.Data.Width
                     && boardIndex.Y >= 0 && boardIndex.Y < board.Data.Height)
                 {
                     if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
-                        if (board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, IsPlayerOneTurn, out PieceType? captured))
+                        if (!board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, IsPlayerOneTurn, out PieceType? captured))
+                        {
+                            failedToPlace = true;
+                        }
+                        else
                         {
                             // If there was a captured piece, not null
                             if (captured is PieceType type)
                             {
                                 CurrentPlayer.Hand.Add(type);
                             }
-                            IsPlayerOneTurn = !IsPlayerOneTurn;
-
-                        }
-                        else
-                        {
-                            failedToPlace = true;
-
                         }
                     }
                     else
                     {
-                        if (board.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
-                        {
-                            IsPlayerOneTurn = !IsPlayerOneTurn;
-                        }
-                        else
+                        if (!board.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
                         {
                             failedToPlace = true;
-
                         }
                     }
                 }
@@ -163,7 +156,25 @@ namespace ShogiClient
                     failedToPlace = true;
                 }
 
-                if (failedToPlace)
+                if (!failedToPlace)
+                {
+                    // Third last and third row respectively
+                    var firstPromotionRow = IsPlayerOneTurn ? 2 : board.Data.Height - 3;
+                    var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
+                    if (IsPlayerOneTurn)
+                    {
+                        indexToPromotionRow = -indexToPromotionRow;
+                    }
+                    if (indexToPromotionRow >= 0)
+                    {
+                        var promotePiece = board.Data.GetAt(boardIndex.X, boardIndex.Y);
+                        if (Utils.CanPromotePieceType(promotePiece.Type))
+                            board.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
+                    }
+
+                    IsPlayerOneTurn = !IsPlayerOneTurn;
+                }
+                else
                 {
                     if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
