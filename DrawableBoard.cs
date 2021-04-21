@@ -14,10 +14,6 @@ namespace ShogiClient
         public Vector2 Size => GetTileOffsetFor(Data.Width - 1, Data.Height - 1) + TileSize;
         public Vector2 TileSize => resources.Tile.Bounds.Size.ToVector2() * Scale;
 
-        public Vector2 HeldPiecePosition { get; set; } = new Vector2(0, 0);
-        // If null, that means it's taken from the hand
-        public (int X, int Y)? HeldPiecePickUpPosition { get; set; } = null;
-
         private GameResources resources;
 
         public DrawableBoard(GameResources resources, int width, int height) : base(width, height)

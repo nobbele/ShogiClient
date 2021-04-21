@@ -1,9 +1,15 @@
+using Microsoft.Xna.Framework;
+
 namespace ShogiClient
 {
     public class Board
     {
         public Grid<PieceData> Data { get; private set; }
         public PieceData HeldPiece { get; set; }
+
+        public Vector2 HeldPiecePosition { get; set; } = new Vector2(0, 0);
+        // If null, that means it's taken from the hand
+        public (int X, int Y)? HeldPiecePickUpPosition { get; set; } = null;
 
         /// <summary>
         ///   Removes a piece from the board and puts it in the HeldPiece property.
