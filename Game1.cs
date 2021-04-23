@@ -175,6 +175,11 @@ namespace ShogiClient
                     IsPlayerOneTurn = !IsPlayerOneTurn;
 
                     // TODO Check checkmate
+                    if (Utils.IsKingChecked(board.Data, IsPlayerOneTurn))
+                    {
+                        Console.WriteLine("Check");
+
+                    }
                 }
                 else
                 {

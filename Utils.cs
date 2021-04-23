@@ -117,11 +117,11 @@ namespace ShogiClient
             _ => throw new System.Exception("Unknown Piece Type"),
         };
 
-        public static List<(int X, int Y)> OpponentControl(
+        public static Dictionary<(int X, int Y), List<(int X, int Y)>> OpponentControl(
             Grid<PieceData> board,
             bool isPlayerOne)
         {
-            var opponentControl = new List<(int X, int Y)>();
+            var opponentControl = new Dictionary<(int X, int Y), List<(int X, int Y)>>();
             for (int y = 0; y < board.Height; y++)
             {
                 for (int x = 0; x < board.Width; x++)
@@ -129,7 +129,7 @@ namespace ShogiClient
                     var pieceOnBoard = board.GetAt(x, y);
                     if (pieceOnBoard != null && pieceOnBoard.IsPlayerOne != isPlayerOne)
                     {
-                        opponentControl.AddRange(ValidMovesForPiece(pieceOnBoard, board, x, y));
+                        opponentControl.Add((x, y), ValidMovesForPiece(pieceOnBoard, board, x, y, false));
                     }
                 }
             }
@@ -142,7 +142,8 @@ namespace ShogiClient
             PieceData piece,
             Grid<PieceData> board,
             int currentX,
-            int currentY)
+            int currentY,
+            bool checkForCheck = true)
         {
             var moveSet = Utils.PieceTypeMoveSet(piece.Type, piece.Promoted);
             (int X, int Y) center = (-1, -1);
@@ -183,28 +184,54 @@ namespace ShogiClient
                             if (c == 'J' || c == 'S')
                             {
                                 if (!occupiedTile)
-                                    validMoves.Add(positionOnBoard);
+                                {
+                                    if (!checkForCheck || !WillMoveCauseCheck(piece, board, currentX, currentY, positionOnBoard.X, positionOnBoard.Y))
+                                    {
+                                        validMoves.Add(positionOnBoard);
+                                    }
+                                }
                             }
                             else if (c == 'M')
                             {
-                                validMoves.AddRange(RayCastPathForMovement(
+                                var moves = RayCastPathForMovement(
                                     currentX, currentY,
                                     localPosition.X, localPosition.Y,
                                     piece.IsPlayerOne,
                                     board
-                                ));
+                                );
+                                if (checkForCheck)
+                                {
+                                    moves = moves.Where(move => !WillMoveCauseCheck(piece, board, currentX, currentY, move.X, move.Y)).ToList();
+                                }
+                                validMoves.AddRange(moves);
                             }
                         }
                     }
                 }
             }
 
-            if (piece.Type == PieceType.King)
-            {
-                validMoves = validMoves.Except(OpponentControl(board, piece.IsPlayerOne)).ToList();
-            }
-
             return validMoves;
+        }
+
+        public static bool IsKingChecked(Grid<PieceData> board, bool isPlayerOne)
+        {
+            var kingPiece = GetPlayerKing(board, isPlayerOne);
+
+            var opponentControl = OpponentControl(board, isPlayerOne);
+            var pieceThatCanTakeKing = opponentControl
+                .Where((pair) => pair.Value.Contains((kingPiece.X, kingPiece.Y)))
+                .ToList();
+            return pieceThatCanTakeKing.Count > 0;
+        }
+
+        public static bool WillMoveCauseCheck(PieceData piece, Grid<PieceData> board, int currentX, int currentY, int targetX, int targetY)
+        {
+            var tempBoard = board.Clone();
+
+            tempBoard.SetAt(currentX, currentY, null);
+            tempBoard.SetAt(targetX, targetY, piece);
+
+            return IsKingChecked(tempBoard, piece.IsPlayerOne);
         }
 
         public static (PieceData piece, int X, int Y) GetPlayerKing(Grid<PieceData> board, bool isPlayerOne)

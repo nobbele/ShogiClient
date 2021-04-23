@@ -25,5 +25,17 @@ namespace ShogiClient
         public bool AreIndicesWithinBounds(int x, int y) =>
             x >= 0 && x < Width
             && y >= 0 && y < Height;
+
+        public Grid<T> Clone()
+        {
+            var clone = new Grid<T>(Width, Height);
+
+            for (int y = 0; y < Height; y++)
+            {
+                clone.Data[y] = (T[])Data[y].Clone();
+            }
+
+            return clone;
+        }
     }
 }
