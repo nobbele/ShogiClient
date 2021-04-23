@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ShogiClient
 {
@@ -116,12 +117,32 @@ namespace ShogiClient
             _ => throw new System.Exception("Unknown Piece Type"),
         };
 
+        public static List<(int X, int Y)> OpponentControl(
+            Grid<PieceData> board,
+            bool isPlayerOne)
+        {
+            var opponentControl = new List<(int X, int Y)>();
+            for (int y = 0; y < board.Height; y++)
+            {
+                for (int x = 0; x < board.Width; x++)
+                {
+                    var pieceOnBoard = board.GetAt(x, y);
+                    if (pieceOnBoard != null && pieceOnBoard.IsPlayerOne != isPlayerOne)
+                    {
+                        opponentControl.AddRange(ValidMovesForPiece(pieceOnBoard, board, x, y));
+                    }
+                }
+            }
+
+            return opponentControl;
+        }
+
+        // TODO Have this function check if mvoing this piece would cause a check/checkmate
         public static List<(int X, int Y)> ValidMovesForPiece(
             PieceData piece,
             Grid<PieceData> board,
             int currentX,
-            int currentY,
-            bool isPlayerOne)
+            int currentY)
         {
             var moveSet = Utils.PieceTypeMoveSet(piece.Type, piece.Promoted);
             (int X, int Y) center = (-1, -1);
@@ -148,7 +169,7 @@ namespace ShogiClient
                     char c = moveSet[y][x];
                     if (c != ' ')
                     {
-                        var localPosition = SidedOffsetToGlobalOffset(center.X, center.Y, x, y, isPlayerOne);
+                        var localPosition = SidedOffsetToGlobalOffset(center.X, center.Y, x, y, piece.IsPlayerOne);
                         (int X, int Y) positionOnBoard = (
                             currentX + localPosition.X,
                             currentY + localPosition.Y
@@ -169,7 +190,7 @@ namespace ShogiClient
                                 validMoves.AddRange(RayCastPathForMovement(
                                     currentX, currentY,
                                     localPosition.X, localPosition.Y,
-                                    isPlayerOne,
+                                    piece.IsPlayerOne,
                                     board
                                 ));
                             }
@@ -178,7 +199,29 @@ namespace ShogiClient
                 }
             }
 
+            if (piece.Type == PieceType.King)
+            {
+                validMoves = validMoves.Except(OpponentControl(board, piece.IsPlayerOne)).ToList();
+            }
+
             return validMoves;
+        }
+
+        public static (PieceData piece, int X, int Y) GetPlayerKing(Grid<PieceData> board, bool isPlayerOne)
+        {
+            for (int y = 0; y < board.Height; y++)
+            {
+                for (int x = 0; x < board.Width; x++)
+                {
+                    var pieceOnBoard = board.GetAt(x, y);
+                    if (pieceOnBoard != null && pieceOnBoard.IsPlayerOne == isPlayerOne && pieceOnBoard.Type == PieceType.King)
+                    {
+                        return (pieceOnBoard, x, y);
+                    }
+                }
+            }
+
+            return (null, -1, -1);
         }
 
         private static (int X, int Y) SidedOffsetToGlobalOffset(int centerX, int centerY, int x, int y, bool isPlayerOne)

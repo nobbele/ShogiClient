@@ -129,7 +129,7 @@ namespace ShogiClient
                 {
                     if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
-                        if (!board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, IsPlayerOneTurn, out PieceType? captured))
+                        if (!board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured))
                         {
                             failedToPlace = true;
                         }
@@ -173,6 +173,8 @@ namespace ShogiClient
                     }
 
                     IsPlayerOneTurn = !IsPlayerOneTurn;
+
+                    // TODO Check checkmate
                 }
                 else
                 {

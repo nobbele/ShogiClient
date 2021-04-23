@@ -89,7 +89,7 @@ namespace ShogiClient
             {
                 if (HeldPiecePickUpPosition is (int, int) pickUpPosition)
                 {
-                    var validMoves = Utils.ValidMovesForPiece(HeldPiece, Data, pickUpPosition.X, pickUpPosition.Y, HeldPiece.IsPlayerOne);
+                    var validMoves = Utils.ValidMovesForPiece(HeldPiece, Data, pickUpPosition.X, pickUpPosition.Y);
 
                     foreach (var validMove in validMoves)
                     {
