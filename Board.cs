@@ -27,7 +27,7 @@ namespace ShogiClient
         /// <summary>
         ///   Removes a piece from the HeldPiece property and puts it on the board.
         /// </summary>
-        public bool PlacePiece(int fromX, int fromY, int targetX, int targetY, out PieceType? captured)
+        public bool PlacePiece(int fromX, int fromY, int targetX, int targetY, out PieceType? captured, bool tryPromote)
         {
             captured = null;
 

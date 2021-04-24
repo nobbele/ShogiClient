@@ -22,6 +22,8 @@ namespace ShogiClient
         private PlayerData playerOne = new PlayerData();
         private PlayerData playerTwo = new PlayerData();
 
+        private MouseState previousMouseState = new MouseState();
+
         public GameplayScreen(Game1 game) : base(game)
         {
 
@@ -60,7 +62,7 @@ namespace ShogiClient
 
             var boardIndex = board.GetTileForCoordinate(mousePosition);
             var currentHandIndex = currentPlayerHand.GetIndexForCoordinate(mousePosition);
-            if (mouseState.LeftButton == ButtonState.Pressed && board.HeldPiece == null)
+            if ((mouseState.LeftButton == ButtonState.Pressed || mouseState.RightButton == ButtonState.Pressed) && board.HeldPiece == null)
             {
                 bool failedToPick = true;
 
@@ -68,7 +70,6 @@ namespace ShogiClient
                     boardIndex.X >= 0 && boardIndex.X < board.Data.Width
                     && boardIndex.Y >= 0 && boardIndex.Y < board.Data.Height)
                 {
-
                     if (board.PickUpPiece(boardIndex.X, boardIndex.Y, IsPlayerOneTurn))
                     {
                         board.HeldPiecePickUpPosition = (boardIndex.X, boardIndex.Y);
@@ -100,15 +101,25 @@ namespace ShogiClient
                 }
             }
 
-            if (mouseState.LeftButton == ButtonState.Released && board.HeldPiece != null)
+            var tryPromote = false;
+
+            var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && previousMouseState.LeftButton == ButtonState.Pressed);
+            var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && previousMouseState.RightButton == ButtonState.Pressed;
+
+            if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.HeldPiece != null)
             {
                 bool failedToPlace = false;
+
+                if (rightMouseButtonReleased)
+                {
+                    tryPromote = true;
+                }
 
                 if (board.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
                 {
                     if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
-                        if (!board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured))
+                        if (!board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured, tryPromote))
                         {
                             failedToPlace = true;
                         }
@@ -138,19 +149,22 @@ namespace ShogiClient
                 {
                     Resources.RandomPiecePlaceSFX.Play(0.5f, 0, 0);
 
-                    // Third last and third row respectively
-                    var firstPromotionRow = IsPlayerOneTurn ? 2 : board.Data.Height - 3;
-                    var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
-                    if (IsPlayerOneTurn)
+                    if (tryPromote)
                     {
-                        indexToPromotionRow = -indexToPromotionRow;
-                    }
-                    if (indexToPromotionRow >= 0)
-                    {
-                        // Always promote, for now
-                        var promotePiece = board.Data.GetAt(boardIndex.X, boardIndex.Y);
-                        if (Utils.CanPromotePieceType(promotePiece.Type))
-                            board.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
+                        // Third last and third row respectively
+                        var firstPromotionRow = IsPlayerOneTurn ? 2 : board.Data.Height - 3;
+                        var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
+                        if (IsPlayerOneTurn)
+                        {
+                            indexToPromotionRow = -indexToPromotionRow;
+                        }
+                        if (indexToPromotionRow >= 0)
+                        {
+                            // Always promote, for now
+                            var promotePiece = board.Data.GetAt(boardIndex.X, boardIndex.Y);
+                            if (Utils.CanPromotePieceType(promotePiece.Type))
+                                board.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
+                        }
                     }
 
                     IsPlayerOneTurn = !IsPlayerOneTurn;
@@ -179,6 +193,8 @@ namespace ShogiClient
             {
                 board.HeldPiecePosition = mousePosition;
             }
+
+            previousMouseState = mouseState;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
