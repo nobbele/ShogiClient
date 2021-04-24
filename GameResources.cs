@@ -7,6 +7,7 @@ namespace ShogiClient
 {
     public class GameResources
     {
+        public Texture2D Background;
         public Texture2D Tile;
         public Texture2D Piece;
         public SpriteFont PieceFont;
@@ -20,6 +21,7 @@ namespace ShogiClient
 
         public void LoadContent(ContentManager content)
         {
+            Background = content.Load<Texture2D>("Tatami");
             Tile = content.Load<Texture2D>("Shogi Tile");
             Piece = content.Load<Texture2D>("Shogi Piece");
             PieceFont = content.Load<SpriteFont>("Piece Font");

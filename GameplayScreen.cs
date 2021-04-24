@@ -185,6 +185,7 @@ namespace ShogiClient
         {
             base.Draw(spriteBatch);
 
+            spriteBatch.Draw(Resources.Background, new Rectangle(0, 0, (int)Game.WindowSize.X, (int)Game.WindowSize.Y), null, Color.White);
             board.Draw(spriteBatch);
             playerOneHand.Draw(spriteBatch);
             playerTwoHand.Draw(spriteBatch);
