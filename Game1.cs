@@ -27,7 +27,7 @@ namespace ShogiClient
         private DrawableBoard board;
         private DrawableHand playerOneHand;
         private DrawableHand playerTwoHand;
-        private DrawableHand currentPlayerHand => isPlayerOneTurn ? playerOneHand : playerTwoHand;
+        private DrawableHand currentPlayerHand => IsPlayerOneTurn ? playerOneHand : playerTwoHand;
 
         private bool isPlayerOneTurn = true;
         private PlayerData playerOne = new PlayerData();
