@@ -35,6 +35,48 @@
 /processorParam:TextureFormat=Color
 /build:Shogi Move Indicator.png
 
+#begin Shogi Piece Pick1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Shogi Piece Pick1.wav
+
+#begin Shogi Piece Pick2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Shogi Piece Pick2.wav
+
+#begin Shogi Piece Place1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Shogi Piece Place1.wav
+
+#begin Shogi Piece Place2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Shogi Piece Place2.wav
+
+#begin Shogi Piece Place3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Shogi Piece Place3.wav
+
+#begin Shogi Piece Place4.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Shogi Piece Place4.wav
+
+#begin Shogi Piece Place5.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Shogi Piece Place5.wav
+
 #begin Shogi Piece.png
 /importer:TextureImporter
 /processor:TextureProcessor
