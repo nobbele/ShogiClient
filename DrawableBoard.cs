@@ -87,17 +87,22 @@ namespace ShogiClient
 
             if (HeldPiece != null)
             {
+                List<(int X, int Y)> validMoves;
                 if (HeldPiecePickUpPosition is (int, int) pickUpPosition)
                 {
-                    var validMoves = Utils.ValidMovesForPiece(HeldPiece, Data, pickUpPosition.X, pickUpPosition.Y);
+                    validMoves = Utils.ValidMovesForPiece(HeldPiece, Data, pickUpPosition.X, pickUpPosition.Y);
+                }
+                else
+                {
+                    validMoves = Utils.ValidPositionsForPieceDrop(HeldPiece, Data);
+                }
 
-                    foreach (var validMove in validMoves)
-                    {
-                        var indicatorPosition = Position
-                            - Size / 2
-                            + GetTileOffsetFor(validMove.X, validMove.Y);
-                        spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
-                    }
+                foreach (var validMove in validMoves)
+                {
+                    var indicatorPosition = Position
+                        - Size / 2
+                        + GetTileOffsetFor(validMove.X, validMove.Y);
+                    spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
                 }
 
                 DrawPiece(spriteBatch, HeldPiece, HeldPiecePosition);

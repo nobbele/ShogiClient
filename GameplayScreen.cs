@@ -160,7 +160,6 @@ namespace ShogiClient
                         }
                         if (indexToPromotionRow >= 0)
                         {
-                            // Always promote, for now
                             var promotePiece = board.Data.GetAt(boardIndex.X, boardIndex.Y);
                             if (Utils.CanPromotePieceType(promotePiece.Type))
                                 board.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
@@ -169,10 +168,13 @@ namespace ShogiClient
 
                     IsPlayerOneTurn = !IsPlayerOneTurn;
 
-                    // TODO Check checkmate
                     if (Utils.IsKingChecked(board.Data, IsPlayerOneTurn))
                     {
                         System.Console.WriteLine("Check");
+                        if (Utils.IsKingCheckMated(board.Data, IsPlayerOneTurn))
+                        {
+                            System.Console.WriteLine("Checkmate");
+                        }
                     }
                 }
                 else

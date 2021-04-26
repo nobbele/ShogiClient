@@ -137,7 +137,6 @@ namespace ShogiClient
             return opponentControl;
         }
 
-        // TODO Have this function check if mvoing this piece would cause a check/checkmate
         public static List<(int X, int Y)> ValidMovesForPiece(
             PieceData piece,
             Grid<PieceData> board,
@@ -213,6 +212,65 @@ namespace ShogiClient
             return validMoves;
         }
 
+        public static List<(int X, int Y)> ValidPositionsForPieceDrop(
+            PieceData piece,
+            Grid<PieceData> board)
+        {
+            var validMoves = new List<(int X, int Y)>();
+
+            // To check two pawn drop, no need to run it on non-pawn pieces but this is easier
+            var pawnColumns = new bool[board.Width];
+            // The two foreach's cannot be collapsed into ones, we need to check the whole board for columns first
+            foreach (var tile in board)
+            {
+                if (tile.Content != null && tile.Content.IsPlayerOne == piece.IsPlayerOne && tile.Content.Type == PieceType.Pawn)
+                {
+                    pawnColumns[tile.X] = true;
+                }
+            }
+
+            foreach (var tile in board)
+            {
+                bool legalPosition = true;
+
+                if (tile.Content != null)
+                {
+                    legalPosition = false;
+                }
+
+                if (piece.Type == PieceType.Pawn)
+                {
+                    if (pawnColumns[tile.X] || Utils.WillMoveCauseCheckFor(piece, board, tile.X, tile.Y, tile.X, tile.Y, !piece.IsPlayerOne))
+                    {
+                        legalPosition = false;
+                    }
+                }
+
+                if (legalPosition)
+                {
+                    validMoves.Add((tile.X, tile.Y));
+                }
+            }
+
+            return validMoves;
+        }
+
+        public static bool IsKingCheckMated(Grid<PieceData> board, bool isPlayerOne)
+        {
+            foreach (var tile in board)
+            {
+                if (tile.Content != null && tile.Content.IsPlayerOne == isPlayerOne)
+                {
+                    if (ValidMovesForPiece(tile.Content, board, tile.X, tile.Y).Count > 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public static bool IsKingChecked(Grid<PieceData> board, bool isPlayerOne)
         {
             var kingPiece = GetPlayerKing(board, isPlayerOne);
@@ -225,13 +283,16 @@ namespace ShogiClient
         }
 
         public static bool WillMoveCauseCheck(PieceData piece, Grid<PieceData> board, int currentX, int currentY, int targetX, int targetY)
+            => WillMoveCauseCheckFor(piece, board, currentX, currentY, targetX, targetY, piece.IsPlayerOne);
+
+        public static bool WillMoveCauseCheckFor(PieceData piece, Grid<PieceData> board, int currentX, int currentY, int targetX, int targetY, bool isPlayerOne)
         {
             var tempBoard = board.Clone();
 
             tempBoard.SetAt(currentX, currentY, null);
             tempBoard.SetAt(targetX, targetY, piece);
 
-            return IsKingChecked(tempBoard, piece.IsPlayerOne);
+            return IsKingChecked(tempBoard, isPlayerOne);
         }
 
         public static (PieceData piece, int X, int Y) GetPlayerKing(Grid<PieceData> board, bool isPlayerOne)

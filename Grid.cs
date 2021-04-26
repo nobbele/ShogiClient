@@ -1,6 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
+
 namespace ShogiClient
 {
-    public class Grid<T>
+    public class Grid<T> : IEnumerable<(T Content, int X, int Y)>
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -36,6 +39,22 @@ namespace ShogiClient
             }
 
             return clone;
+        }
+
+        public IEnumerator<(T Content, int X, int Y)> GetEnumerator()
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    yield return (GetAt(x, y), x, y);
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

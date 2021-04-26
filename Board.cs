@@ -39,14 +39,7 @@ namespace ShogiClient
             var piece = Data.GetAt(targetX, targetY);
             if (piece != null)
             {
-                if (piece.IsPlayerOne == HeldPiece.IsPlayerOne)
-                {
-                    return false;
-                }
-                else
-                {
-                    captured = piece.Type;
-                }
+                captured = piece.Type;
             }
             PlacePiece(targetX, targetY);
             return true;
@@ -57,16 +50,12 @@ namespace ShogiClient
         /// </summary>
         public bool PlacePieceFromHand(int targetX, int targetY)
         {
-            if (HeldPiece.Type == PieceType.Pawn)
-            {
-                // TODO Check two pawn place and pawn mate
-            }
-
-            var piece = Data.GetAt(targetX, targetY);
-            if (piece != null)
+            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data).Contains((targetX, targetY)))
             {
                 return false;
             }
+
+            var piece = Data.GetAt(targetX, targetY);
             PlacePiece(targetX, targetY);
             return true;
         }
