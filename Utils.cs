@@ -27,7 +27,6 @@ namespace ShogiClient
             'S' => PieceType.Silver,
             'G' => PieceType.Gold,
             'K' => PieceType.King,
-            //
             ' ' => null,
             _ => throw new System.Exception("Unknown Piece Type"),
         };
