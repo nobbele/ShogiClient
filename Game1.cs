@@ -35,8 +35,8 @@ namespace ShogiClient
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            //CurrentScreen = new GameplayScreen(this);
-            CurrentScreen = new MainMenuScreen(this);
+            CurrentScreen = new GameplayScreen(this);
+            //CurrentScreen = new MainMenuScreen(this);
             CurrentScreen.Initialize(resources);
 
             base.Initialize();
