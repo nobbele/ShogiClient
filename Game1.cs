@@ -29,15 +29,20 @@ namespace ShogiClient
             Window.AllowUserResizing = false;
         }
 
+        public void SetCurrentScreen(Screen screen)
+        {
+            CurrentScreen = screen;
+            CurrentScreen.Initialize(resources);
+        }
+
         protected override void Initialize()
         {
             graphics.PreferredBackBufferWidth = 1366;
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            CurrentScreen = new GameplayScreen(this);
-            //CurrentScreen = new MainMenuScreen(this);
-            CurrentScreen.Initialize(resources);
+            SetCurrentScreen(new MainMenuScreen(this));
+            //SetCurrentScreen(new GameplayScreen(this));
 
             base.Initialize();
         }

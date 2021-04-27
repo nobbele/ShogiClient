@@ -23,6 +23,18 @@
 #begin NotoSansCJKjp-DemiLight.otf
 /copy:NotoSansCJKjp-DemiLight.otf
 
+#begin Shogi Logo.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Shogi Logo.png
+
 #begin Shogi Move Indicator.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -100,6 +112,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Shogi Tile.png
+
+#begin Stone Background.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Stone Background.png
 
 #begin tatami02.jpg
 /importer:TextureImporter

@@ -14,7 +14,7 @@ namespace ShogiClient
 
         private bool isBeingClicked = false;
 
-        private Rectangle RectOnScreen => new Rectangle(Position.ToPoint(), Size.ToPoint());
+        private Rectangle RectOnScreen => new Rectangle((Position - Size / 2).ToPoint(), Size.ToPoint());
 
         private GameResources resources;
 
@@ -51,7 +51,7 @@ namespace ShogiClient
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(resources.UIButton, RectOnScreen, null, Color.White);
-            spriteBatch.DrawString(resources.PieceFont, Text, Position + Size / 2 - resources.PieceFont.MeasureString(Text) / 2, Color.White);
+            spriteBatch.DrawString(resources.PieceFont, Text, RectOnScreen.Center.ToVector2() - resources.PieceFont.MeasureString(Text) / 2, Color.White);
         }
     }
 }
