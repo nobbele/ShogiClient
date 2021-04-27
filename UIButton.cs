@@ -9,23 +9,49 @@ namespace ShogiClient
     {
         public Vector2 Position { get; set; }
         public Vector2 Size { get; set; }
-
+        public string Text { get; set; }
         public event Action OnClick;
+
+        private bool isBeingClicked = false;
+
+        private Rectangle RectOnScreen => new Rectangle(Position.ToPoint(), Size.ToPoint());
+
+        private GameResources resources;
+
+        public UIButton(GameResources resources)
+        {
+            this.resources = resources;
+        }
 
         public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, MouseState prevMouseState)
         {
+            if (isBeingClicked)
+            {
+                if (!RectOnScreen.Contains(mouseState.Position))
+                {
+                    isBeingClicked = false;
+                }
+
+                if (mouseState.LeftButton == ButtonState.Released)
+                {
+                    OnClick.Invoke();
+                    isBeingClicked = false;
+                }
+            }
+
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
                 if (prevMouseState.LeftButton == ButtonState.Released)
                 {
-
+                    isBeingClicked = true;
                 }
             }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-
+            spriteBatch.Draw(resources.UIButton, RectOnScreen, null, Color.White);
+            spriteBatch.DrawString(resources.PieceFont, Text, Position + Size / 2 - resources.PieceFont.MeasureString(Text) / 2, Color.White);
         }
     }
 }

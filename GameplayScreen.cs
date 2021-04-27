@@ -22,8 +22,6 @@ namespace ShogiClient
         private PlayerData playerOne = new PlayerData();
         private PlayerData playerTwo = new PlayerData();
 
-        private MouseState previousMouseState = new MouseState();
-
         public GameplayScreen(Game1 game) : base(game)
         {
 
@@ -54,9 +52,9 @@ namespace ShogiClient
             };
         }
 
-        public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState)
+        public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, MouseState prevMouseState)
         {
-            base.Update(gameTime, keyboardState, mouseState);
+            base.Update(gameTime, keyboardState, mouseState, prevMouseState);
 
             var mousePosition = mouseState.Position.ToVector2();
 
@@ -103,8 +101,8 @@ namespace ShogiClient
 
             var tryPromote = false;
 
-            var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && previousMouseState.LeftButton == ButtonState.Pressed);
-            var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && previousMouseState.RightButton == ButtonState.Pressed;
+            var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed);
+            var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && prevMouseState.RightButton == ButtonState.Pressed;
 
             if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.HeldPiece != null)
             {
@@ -195,8 +193,6 @@ namespace ShogiClient
             {
                 board.HeldPiecePosition = mousePosition;
             }
-
-            previousMouseState = mouseState;
         }
 
         public override void Draw(SpriteBatch spriteBatch)

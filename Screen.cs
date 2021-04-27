@@ -19,7 +19,7 @@ namespace ShogiClient
             Resources = resources;
         }
 
-        public virtual void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState)
+        public virtual void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, MouseState prevMouseState)
         {
 
         }

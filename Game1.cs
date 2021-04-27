@@ -18,6 +18,8 @@ namespace ShogiClient
 
         private GameResources resources = new GameResources();
 
+        private MouseState prevMouseState = new MouseState();
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -33,7 +35,8 @@ namespace ShogiClient
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            CurrentScreen = new GameplayScreen(this);
+            //CurrentScreen = new GameplayScreen(this);
+            CurrentScreen = new MainMenuScreen(this);
             CurrentScreen.Initialize(resources);
 
             base.Initialize();
@@ -55,7 +58,9 @@ namespace ShogiClient
             if (keyboardState.IsKeyDown(Keys.Escape))
                 Exit();
 
-            CurrentScreen.Update(gameTime, keyboardState, mouseState);
+            CurrentScreen.Update(gameTime, keyboardState, mouseState, prevMouseState);
+
+            prevMouseState = mouseState;
 
             base.Update(gameTime);
         }
