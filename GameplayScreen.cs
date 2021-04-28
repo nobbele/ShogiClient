@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
@@ -55,6 +56,11 @@ namespace ShogiClient
         public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, MouseState prevMouseState)
         {
             var mousePosition = mouseState.Position.ToVector2();
+
+            if (MediaPlayer.State == MediaState.Stopped)
+            {
+                MediaPlayer.Play(Resources.RandomGameplaySong);
+            }
 
             var boardIndex = board.GetTileForCoordinate(mousePosition);
             var currentHandIndex = currentPlayerHand.GetIndexForCoordinate(mousePosition);

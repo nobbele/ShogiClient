@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
@@ -30,6 +31,11 @@ namespace ShogiClient
 
         public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, MouseState prevMouseState)
         {
+            if (MediaPlayer.State == MediaState.Stopped)
+            {
+                MediaPlayer.Play(Resources.RandomMainMenuSong);
+            }
+
             startGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 

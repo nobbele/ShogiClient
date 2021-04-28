@@ -20,6 +20,24 @@
 /processorParam:TextureFormat=Compressed
 /build:File.spritefont;Piece Font.spritefont
 
+#begin Music/Haru - Taketori (Instrumental).mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/Haru - Taketori (Instrumental).mp3
+
+#begin Music/Silver Forest - Cherry Phantasm - 11 - .mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/Silver Forest - Cherry Phantasm - 11 - .mp3
+
+#begin Music/To the Limitt.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/To the Limitt.mp3
+
 #begin NotoSansCJKjp-DemiLight.otf
 /copy:NotoSansCJKjp-DemiLight.otf
 

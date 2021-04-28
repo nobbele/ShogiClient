@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
@@ -32,6 +33,7 @@ namespace ShogiClient
         public void SetCurrentScreen(Screen screen)
         {
             CurrentScreen = screen;
+            MediaPlayer.Stop();
             CurrentScreen.Initialize(resources);
         }
 
@@ -40,6 +42,8 @@ namespace ShogiClient
             graphics.PreferredBackBufferWidth = 1366;
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
+
+            MediaPlayer.Volume = 0.05f;
 
             SetCurrentScreen(new MainMenuScreen(this));
             //SetCurrentScreen(new GameplayScreen(this));

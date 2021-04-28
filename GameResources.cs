@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
@@ -19,6 +20,10 @@ namespace ShogiClient
         public SoundEffect[] PiecePlaceSFXs;
         public SoundEffect RandomPiecePickSFX => PiecePickSFXs[random.Next(PiecePickSFXs.Length)];
         public SoundEffect[] PiecePickSFXs;
+        public Song RandomMainMenuSong => MainMenuSongs[random.Next(MainMenuSongs.Length)];
+        public Song[] MainMenuSongs;
+        public Song RandomGameplaySong => GameplaySongs[random.Next(GameplaySongs.Length)];
+        public Song[] GameplaySongs;
 
         private Random random = new Random();
 
@@ -43,6 +48,13 @@ namespace ShogiClient
             PiecePickSFXs = new SoundEffect[2];
             PiecePickSFXs[0] = content.Load<SoundEffect>("Shogi Piece Pick1");
             PiecePickSFXs[1] = content.Load<SoundEffect>("Shogi Piece Pick2");
+
+            MainMenuSongs = new Song[1];
+            MainMenuSongs[0] = content.Load<Song>("Music/To the Limitt");
+
+            GameplaySongs = new Song[2];
+            GameplaySongs[0] = content.Load<Song>("Music/Silver Forest - Cherry Phantasm - 11 - ");
+            GameplaySongs[1] = content.Load<Song>("Music/Haru - Taketori (Instrumental)");
         }
     }
 }
