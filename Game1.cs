@@ -20,6 +20,7 @@ namespace ShogiClient
         private GameResources resources = new GameResources();
 
         private MouseState prevMouseState = new MouseState();
+        private KeyboardState prevKeyboardState = new KeyboardState();
 
         public Game1()
         {
@@ -35,6 +36,8 @@ namespace ShogiClient
             CurrentScreen = screen;
             MediaPlayer.Stop();
             CurrentScreen.Initialize(resources);
+
+            Console.WriteLine($"Loaded Screen {screen.GetType().Name}");
         }
 
         protected override void Initialize()
@@ -64,12 +67,10 @@ namespace ShogiClient
             var keyboardState = Keyboard.GetState();
             var mouseState = Mouse.GetState();
 
-            if (keyboardState.IsKeyDown(Keys.Escape))
-                Exit();
-
-            CurrentScreen.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            CurrentScreen.Update(gameTime, keyboardState, prevKeyboardState, mouseState, prevMouseState);
 
             prevMouseState = mouseState;
+            prevKeyboardState = keyboardState;
 
             base.Update(gameTime);
         }
@@ -83,6 +84,14 @@ namespace ShogiClient
 
             spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+        public Texture2D Screenshot() {
+            var renderTarget = new RenderTarget2D(GraphicsDevice, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            GraphicsDevice.SetRenderTarget(renderTarget);
+            Draw(new GameTime());
+            GraphicsDevice.SetRenderTarget(null);
+            return renderTarget;
         }
     }
 }

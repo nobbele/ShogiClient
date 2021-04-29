@@ -6,19 +6,21 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShogiClient
 {
-    public class DrawableBoard : Board
+    public class DrawableBoard
     {
         public Vector2 Position { get; set; }
         public Vector2 Scale { get; set; } = Vector2.One;
+        public Board State { get; set; }
 
-        public Vector2 Size => GetTileOffsetFor(Data.Width - 1, Data.Height - 1) + TileSize;
+        public Vector2 Size => GetTileOffsetFor(State.Data.Width - 1, State.Data.Height - 1) + TileSize;
         public Vector2 TileSize => resources.Tile.Bounds.Size.ToVector2() * Scale;
 
         private GameResources resources;
 
-        public DrawableBoard(GameResources resources, int width, int height) : base(width, height)
+        public DrawableBoard(GameResources resources, Board state)
         {
             this.resources = resources;
+            State = state;
         }
 
         public Vector2 GetTileOffsetFor(int x, int y) => new Vector2((TileSize.X - 1) * x, (TileSize.Y - 1) * y);
@@ -62,15 +64,15 @@ namespace ShogiClient
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            for (int y = 0; y < Data.Height; y++)
+            for (int y = 0; y < State.Data.Height; y++)
             {
-                for (int x = 0; x < Data.Width; x++)
+                for (int x = 0; x < State.Data.Width; x++)
                 {
                     var tilePosition = Position - Size / 2 + GetTileOffsetFor(x, y);
 
                     spriteBatch.Draw(resources.Tile, tilePosition - resources.Tile.Bounds.Size.ToVector2() * Scale / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
 
-                    var piece = Data.GetAt(x, y);
+                    var piece = State.Data.GetAt(x, y);
                     if (piece != null)
                     {
                         DrawPiece(spriteBatch, piece, tilePosition);
@@ -85,16 +87,16 @@ namespace ShogiClient
                 }
             }
 
-            if (HeldPiece != null)
+            if (State.HeldPiece != null)
             {
                 List<(int X, int Y)> validMoves;
-                if (HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                if (State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                 {
-                    validMoves = Utils.ValidMovesForPiece(HeldPiece, Data, pickUpPosition.X, pickUpPosition.Y);
+                    validMoves = Utils.ValidMovesForPiece(State.HeldPiece, State.Data, pickUpPosition.X, pickUpPosition.Y);
                 }
                 else
                 {
-                    validMoves = Utils.ValidPositionsForPieceDrop(HeldPiece, Data);
+                    validMoves = Utils.ValidPositionsForPieceDrop(State.HeldPiece, State.Data);
                 }
 
                 foreach (var validMove in validMoves)
@@ -105,7 +107,7 @@ namespace ShogiClient
                     spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
                 }
 
-                DrawPiece(spriteBatch, HeldPiece, HeldPiecePosition);
+                DrawPiece(spriteBatch, State.HeldPiece, State.HeldPiecePosition);
             }
         }
     }

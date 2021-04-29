@@ -10,7 +10,7 @@ namespace ShogiClient
         private DrawableBoard board;
         private DrawableHand playerOneHand;
         private DrawableHand playerTwoHand;
-        private DrawableHand currentPlayerHand => state.IsPlayerOneTurn ? playerOneHand : playerTwoHand;
+        private DrawableHand currentPlayerHand => State.IsPlayerOneTurn ? playerOneHand : playerTwoHand;
 
         public GameplayScreen(Game1 game) : base(game)
         {
@@ -21,7 +21,7 @@ namespace ShogiClient
         {
             base.Initialize(resources);
 
-            board = new DrawableBoard(resources, 9, 9)
+            board = new DrawableBoard(resources, State.boardState)
             {
                 Position = Game.WindowSize / 2,
                 Scale = new Vector2(2f, 2f),
@@ -29,21 +29,28 @@ namespace ShogiClient
 
             playerOneHand = new DrawableHand(resources)
             {
-                PlayerData = state.playerOne,
+                PlayerData = State.playerOne,
                 Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y - 50),
                 Scale = new Vector2(1.5f)
             };
 
             playerTwoHand = new DrawableHand(resources)
             {
-                PlayerData = state.playerTwo,
+                PlayerData = State.playerTwo,
                 Position = new Vector2(Game.WindowSize.X / 2, 50),
                 Scale = new Vector2(1.5f)
             };
         }
 
-        public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, MouseState prevMouseState)
+        public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
         {
+            if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape)) 
+            {
+                var currentGraphic = Game.Screenshot();
+                Game.SetCurrentScreen(new GameplayPauseScreen(Game, State, currentGraphic));
+                return;
+            }
+
             var mousePosition = mouseState.Position.ToVector2();
 
             if (MediaPlayer.State == MediaState.Stopped)
@@ -53,35 +60,35 @@ namespace ShogiClient
 
             var boardIndex = board.GetTileForCoordinate(mousePosition);
             var currentHandIndex = currentPlayerHand.GetIndexForCoordinate(mousePosition);
-            if ((mouseState.LeftButton == ButtonState.Pressed || mouseState.RightButton == ButtonState.Pressed) && board.HeldPiece == null)
+            if ((mouseState.LeftButton == ButtonState.Pressed || mouseState.RightButton == ButtonState.Pressed) && board.State.HeldPiece == null)
             {
                 bool failedToPick = true;
 
                 if (
-                    boardIndex.X >= 0 && boardIndex.X < board.Data.Width
-                    && boardIndex.Y >= 0 && boardIndex.Y < board.Data.Height)
+                    boardIndex.X >= 0 && boardIndex.X < board.State.Data.Width
+                    && boardIndex.Y >= 0 && boardIndex.Y < board.State.Data.Height)
                 {
-                    if (board.PickUpPiece(boardIndex.X, boardIndex.Y, state.IsPlayerOneTurn))
+                    if (board.State.PickUpPiece(boardIndex.X, boardIndex.Y, State.IsPlayerOneTurn))
                     {
-                        board.HeldPiecePickUpPosition = (boardIndex.X, boardIndex.Y);
+                        board.State.HeldPiecePickUpPosition = (boardIndex.X, boardIndex.Y);
                         failedToPick = false;
                     }
                 }
                 else
                 {
-                    if (currentHandIndex.X >= 0 && currentHandIndex.X < state.CurrentPlayer.Hand.Count
+                    if (currentHandIndex.X >= 0 && currentHandIndex.X < State.CurrentPlayer.Hand.Count
                     && currentHandIndex.Y == 0)
                     {
                         var idx = currentHandIndex.X;
-                        var pieceType = state.CurrentPlayer.Hand[idx];
-                        state.CurrentPlayer.Hand.RemoveAt(idx);
-                        board.HeldPiece = new PieceData()
+                        var pieceType = State.CurrentPlayer.Hand[idx];
+                        State.CurrentPlayer.Hand.RemoveAt(idx);
+                        board.State.HeldPiece = new PieceData()
                         {
                             Type = pieceType,
                             Promoted = false,
-                            IsPlayerOne = state.IsPlayerOneTurn,
+                            IsPlayerOne = State.IsPlayerOneTurn,
                         };
-                        board.HeldPiecePickUpPosition = null;
+                        board.State.HeldPiecePickUpPosition = null;
                         failedToPick = false;
                     }
                 }
@@ -95,16 +102,16 @@ namespace ShogiClient
             var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed);
             var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && prevMouseState.RightButton == ButtonState.Pressed;
 
-            if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.HeldPiece != null)
+            if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.State.HeldPiece != null)
             {
                 bool failedToPlace = false;
                 var tryPromote = false;
 
-                if (board.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
+                if (board.State.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
                 {
-                    if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                    if (board.State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
-                        if (!board.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured, tryPromote))
+                        if (!board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured, tryPromote))
                         {
                             failedToPlace = true;
                         }
@@ -113,7 +120,7 @@ namespace ShogiClient
                             // If there was a captured piece, not null
                             if (captured is PieceType type)
                             {
-                                state.CurrentPlayer.Hand.Add(type);
+                                State.CurrentPlayer.Hand.Add(type);
                             }
 
                             if (rightMouseButtonReleased) {
@@ -123,7 +130,7 @@ namespace ShogiClient
                     }
                     else
                     {
-                        if (!board.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
+                        if (!board.State.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
                         {
                             failedToPlace = true;
                         }
@@ -141,26 +148,26 @@ namespace ShogiClient
                     if (tryPromote)
                     {
                         // Third last and third row respectively
-                        var firstPromotionRow = state.IsPlayerOneTurn ? 2 : board.Data.Height - 3;
+                        var firstPromotionRow = State.IsPlayerOneTurn ? 2 : board.State.Data.Height - 3;
                         var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
-                        if (state.IsPlayerOneTurn)
+                        if (State.IsPlayerOneTurn)
                         {
                             indexToPromotionRow = -indexToPromotionRow;
                         }
                         if (indexToPromotionRow >= 0)
                         {
-                            var promotePiece = board.Data.GetAt(boardIndex.X, boardIndex.Y);
+                            var promotePiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y);
                             if (Utils.CanPromotePieceType(promotePiece.Type))
-                                board.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
+                                board.State.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
                         }
                     }
 
-                    state.IsPlayerOneTurn = !state.IsPlayerOneTurn;
+                    State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
 
-                    if (Utils.IsKingChecked(board.Data, state.IsPlayerOneTurn))
+                    if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
                     {
                         System.Console.WriteLine("Check");
-                        if (Utils.IsKingCheckMated(board.Data, state.IsPlayerOneTurn))
+                        if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
                         {
                             System.Console.WriteLine("Checkmate");
                         }
@@ -168,21 +175,21 @@ namespace ShogiClient
                 }
                 else
                 {
-                    if (board.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                    if (board.State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
-                        board.PlacePiece(pickUpPosition.X, pickUpPosition.Y);
+                        board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y);
                     }
                     else
                     {
-                        state.CurrentPlayer.Hand.Add(board.HeldPiece.Type);
-                        board.HeldPiece = null;
+                        State.CurrentPlayer.Hand.Add(board.State.HeldPiece.Type);
+                        board.State.HeldPiece = null;
                     }
                 }
             }
 
-            if (board.HeldPiece != null)
+            if (board.State.HeldPiece != null)
             {
-                board.HeldPiecePosition = mousePosition;
+                board.State.HeldPiecePosition = mousePosition;
             }
         }
 

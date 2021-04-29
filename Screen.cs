@@ -19,7 +19,7 @@ namespace ShogiClient
             Resources = resources;
         }
 
-        public abstract void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, MouseState prevMouseState);
+        public abstract void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState);
         public abstract void Draw(SpriteBatch spriteBatch);
     }
 }

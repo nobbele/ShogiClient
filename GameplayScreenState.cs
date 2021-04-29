@@ -13,5 +13,7 @@ namespace ShogiClient
 
         public PlayerData playerOne = new PlayerData();
         public PlayerData playerTwo = new PlayerData();
+
+        public Board boardState = new Board(9, 9);
     }
 }

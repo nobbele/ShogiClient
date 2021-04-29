@@ -29,7 +29,7 @@ namespace ShogiClient
             };
         }
 
-        public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, MouseState prevMouseState)
+        public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
         {
             if (MediaPlayer.State == MediaState.Stopped)
             {
