@@ -103,19 +103,13 @@ namespace ShogiClient
                 }
             }
 
-            var tryPromote = false;
-
             var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed);
             var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && prevMouseState.RightButton == ButtonState.Pressed;
 
             if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.HeldPiece != null)
             {
                 bool failedToPlace = false;
-
-                if (rightMouseButtonReleased)
-                {
-                    tryPromote = true;
-                }
+                var tryPromote = false;
 
                 if (board.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
                 {
@@ -131,6 +125,10 @@ namespace ShogiClient
                             if (captured is PieceType type)
                             {
                                 CurrentPlayer.Hand.Add(type);
+                            }
+
+                            if (rightMouseButtonReleased) {
+                                tryPromote = true;
                             }
                         }
                     }
