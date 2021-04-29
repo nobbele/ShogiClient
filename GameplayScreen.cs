@@ -5,23 +5,12 @@ using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
-    public class GameplayScreen : Screen
+    public class GameplayScreen : StatefulScreen<GameplayScreenState>
     {
-        public PlayerData CurrentPlayer => isPlayerOneTurn ? playerOne : playerTwo;
-        public bool IsPlayerOneTurn
-        {
-            get => Game1.DEBUG_PLAYERONE ? true : isPlayerOneTurn;
-            set => isPlayerOneTurn = value;
-        }
-
         private DrawableBoard board;
         private DrawableHand playerOneHand;
         private DrawableHand playerTwoHand;
-        private DrawableHand currentPlayerHand => IsPlayerOneTurn ? playerOneHand : playerTwoHand;
-
-        private bool isPlayerOneTurn = true;
-        private PlayerData playerOne = new PlayerData();
-        private PlayerData playerTwo = new PlayerData();
+        private DrawableHand currentPlayerHand => state.IsPlayerOneTurn ? playerOneHand : playerTwoHand;
 
         public GameplayScreen(Game1 game) : base(game)
         {
@@ -40,14 +29,14 @@ namespace ShogiClient
 
             playerOneHand = new DrawableHand(resources)
             {
-                PlayerData = playerOne,
+                PlayerData = state.playerOne,
                 Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y - 50),
                 Scale = new Vector2(1.5f)
             };
 
             playerTwoHand = new DrawableHand(resources)
             {
-                PlayerData = playerTwo,
+                PlayerData = state.playerTwo,
                 Position = new Vector2(Game.WindowSize.X / 2, 50),
                 Scale = new Vector2(1.5f)
             };
@@ -72,7 +61,7 @@ namespace ShogiClient
                     boardIndex.X >= 0 && boardIndex.X < board.Data.Width
                     && boardIndex.Y >= 0 && boardIndex.Y < board.Data.Height)
                 {
-                    if (board.PickUpPiece(boardIndex.X, boardIndex.Y, IsPlayerOneTurn))
+                    if (board.PickUpPiece(boardIndex.X, boardIndex.Y, state.IsPlayerOneTurn))
                     {
                         board.HeldPiecePickUpPosition = (boardIndex.X, boardIndex.Y);
                         failedToPick = false;
@@ -80,17 +69,17 @@ namespace ShogiClient
                 }
                 else
                 {
-                    if (currentHandIndex.X >= 0 && currentHandIndex.X < CurrentPlayer.Hand.Count
+                    if (currentHandIndex.X >= 0 && currentHandIndex.X < state.CurrentPlayer.Hand.Count
                     && currentHandIndex.Y == 0)
                     {
                         var idx = currentHandIndex.X;
-                        var pieceType = CurrentPlayer.Hand[idx];
-                        CurrentPlayer.Hand.RemoveAt(idx);
+                        var pieceType = state.CurrentPlayer.Hand[idx];
+                        state.CurrentPlayer.Hand.RemoveAt(idx);
                         board.HeldPiece = new PieceData()
                         {
                             Type = pieceType,
                             Promoted = false,
-                            IsPlayerOne = IsPlayerOneTurn,
+                            IsPlayerOne = state.IsPlayerOneTurn,
                         };
                         board.HeldPiecePickUpPosition = null;
                         failedToPick = false;
@@ -124,7 +113,7 @@ namespace ShogiClient
                             // If there was a captured piece, not null
                             if (captured is PieceType type)
                             {
-                                CurrentPlayer.Hand.Add(type);
+                                state.CurrentPlayer.Hand.Add(type);
                             }
 
                             if (rightMouseButtonReleased) {
@@ -152,9 +141,9 @@ namespace ShogiClient
                     if (tryPromote)
                     {
                         // Third last and third row respectively
-                        var firstPromotionRow = IsPlayerOneTurn ? 2 : board.Data.Height - 3;
+                        var firstPromotionRow = state.IsPlayerOneTurn ? 2 : board.Data.Height - 3;
                         var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
-                        if (IsPlayerOneTurn)
+                        if (state.IsPlayerOneTurn)
                         {
                             indexToPromotionRow = -indexToPromotionRow;
                         }
@@ -166,12 +155,12 @@ namespace ShogiClient
                         }
                     }
 
-                    IsPlayerOneTurn = !IsPlayerOneTurn;
+                    state.IsPlayerOneTurn = !state.IsPlayerOneTurn;
 
-                    if (Utils.IsKingChecked(board.Data, IsPlayerOneTurn))
+                    if (Utils.IsKingChecked(board.Data, state.IsPlayerOneTurn))
                     {
                         System.Console.WriteLine("Check");
-                        if (Utils.IsKingCheckMated(board.Data, IsPlayerOneTurn))
+                        if (Utils.IsKingCheckMated(board.Data, state.IsPlayerOneTurn))
                         {
                             System.Console.WriteLine("Checkmate");
                         }
@@ -185,7 +174,7 @@ namespace ShogiClient
                     }
                     else
                     {
-                        CurrentPlayer.Hand.Add(board.HeldPiece.Type);
+                        state.CurrentPlayer.Hand.Add(board.HeldPiece.Type);
                         board.HeldPiece = null;
                     }
                 }
