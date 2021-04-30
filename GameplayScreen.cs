@@ -40,23 +40,23 @@ namespace ShogiClient
                 Position = new Vector2(Game.WindowSize.X / 2, 50),
                 Scale = new Vector2(1.5f)
             };
-        }
-
-        public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
-        {
-            if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape)) 
-            {
-                var currentGraphic = Game.Screenshot();
-                Game.SetCurrentScreen(new GameplayPauseScreen(Game, State, currentGraphic));
-                return;
-            }
-
-            var mousePosition = mouseState.Position.ToVector2();
 
             if (MediaPlayer.State == MediaState.Stopped)
             {
                 MediaPlayer.Play(Resources.RandomGameplaySong);
             }
+        }
+
+        public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
+        {
+            if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
+            {
+                var currentGraphic = Game.Screenshot();
+                Game.SetCurrentScreen(new GameplayPauseScreen(Game, State, currentGraphic), false);
+                return;
+            }
+
+            var mousePosition = mouseState.Position.ToVector2();
 
             var boardIndex = board.GetTileForCoordinate(mousePosition);
             var currentHandIndex = currentPlayerHand.GetIndexForCoordinate(mousePosition);
@@ -123,7 +123,8 @@ namespace ShogiClient
                                 State.CurrentPlayer.Hand.Add(type);
                             }
 
-                            if (rightMouseButtonReleased) {
+                            if (rightMouseButtonReleased)
+                            {
                                 tryPromote = true;
                             }
                         }

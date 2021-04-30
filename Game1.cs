@@ -31,10 +31,11 @@ namespace ShogiClient
             Window.AllowUserResizing = false;
         }
 
-        public void SetCurrentScreen(Screen screen)
+        public void SetCurrentScreen(Screen screen, bool stopMusic = true)
         {
             CurrentScreen = screen;
-            MediaPlayer.Stop();
+            if (stopMusic)
+                MediaPlayer.Stop();
             CurrentScreen.Initialize(resources);
 
             Console.WriteLine($"Loaded Screen {screen.GetType().Name}");
@@ -86,7 +87,8 @@ namespace ShogiClient
             base.Draw(gameTime);
         }
 
-        public Texture2D Screenshot() {
+        public Texture2D Screenshot()
+        {
             var renderTarget = new RenderTarget2D(GraphicsDevice, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
             GraphicsDevice.SetRenderTarget(renderTarget);
             Draw(new GameTime());

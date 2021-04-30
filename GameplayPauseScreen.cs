@@ -16,19 +16,20 @@ namespace ShogiClient
         {
             this.gameplayState = gameplayState;
             this.background = background;
-            panel = new UIPanel(game) {
+            panel = new UIPanel(game)
+            {
                 Position = new Vector2(100, 100),
-                Size = new Vector2(700, 500),
+                Size = Game.WindowSize - new Vector2(200, 200),
             };
         }
 
         public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
         {
-            if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape)) 
+            if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
             {
                 var gameplayScreen = new GameplayScreen(Game);
                 gameplayScreen.State = gameplayState;
-                Game.SetCurrentScreen(gameplayScreen);
+                Game.SetCurrentScreen(gameplayScreen, false);
                 return;
             }
         }
