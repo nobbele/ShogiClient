@@ -27,9 +27,7 @@ namespace ShogiClient
         {
             if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
             {
-                var gameplayScreen = new GameplayScreen(Game);
-                gameplayScreen.State = gameplayState;
-                Game.SetCurrentScreen(gameplayScreen, false);
+                Game.SetCurrentScreen(new MainMenuScreen(Game));
                 return;
             }
         }
