@@ -11,6 +11,7 @@ namespace ShogiClient
         private DrawableHand playerOneHand;
         private DrawableHand playerTwoHand;
         private DrawableHand currentPlayerHand => State.IsPlayerOneTurn ? playerOneHand : playerTwoHand;
+        private UIPanel CheckPanel;
 
         public GameplayScreen(Game1 game) : base(game)
         {
@@ -40,6 +41,12 @@ namespace ShogiClient
                 Position = new Vector2(Game.WindowSize.X / 2, 50),
                 Scale = new Vector2(1.5f)
             };
+            CheckPanel = new UIPanel(Game)
+            {
+                Position = Vector2.Zero,
+                Size = Game.WindowSize,
+                Color = new Color(Color.DarkRed, 0.001f),
+            };
 
             if (MediaPlayer.State == MediaState.Stopped)
             {
@@ -52,7 +59,7 @@ namespace ShogiClient
             if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
             {
                 var currentGraphic = Game.Screenshot();
-                Game.SetCurrentScreen(new GameplayPauseScreen(Game, State, currentGraphic), false);
+                Game.SetCurrentScreen(new GameplayPauseScreen(Game, Resources, State, currentGraphic), false);
                 return;
             }
 
@@ -165,12 +172,16 @@ namespace ShogiClient
 
                     State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
 
+                    State.isCheck = false;
+
                     if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
                     {
-                        System.Console.WriteLine("Check");
+                        State.isCheck = true;
                         if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
                         {
-                            System.Console.WriteLine("Checkmate");
+                            var currentGraphic = Game.Screenshot();
+                            Game.SetCurrentScreen(new ResultScreen(Game, State, currentGraphic), false);
+                            return;
                         }
                     }
                 }
@@ -200,6 +211,10 @@ namespace ShogiClient
             board.Draw(spriteBatch);
             playerOneHand.Draw(spriteBatch);
             playerTwoHand.Draw(spriteBatch);
+            if (State.isCheck)
+            {
+                CheckPanel.Draw(spriteBatch);
+            }
         }
     }
 }

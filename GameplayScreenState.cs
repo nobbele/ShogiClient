@@ -10,6 +10,7 @@ namespace ShogiClient
         }
 
         public bool isPlayerOneTurn = true;
+        public bool isCheck = false;
 
         public PlayerData playerOne = new PlayerData();
         public PlayerData playerTwo = new PlayerData();

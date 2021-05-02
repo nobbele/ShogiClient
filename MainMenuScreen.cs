@@ -8,9 +8,11 @@ namespace ShogiClient
     public class MainMenuScreen : Screen
     {
         private UIButton startGameButton;
+        private UIButton exitGameButton;
 
         public MainMenuScreen(Game1 game) : base(game)
         {
+
         }
 
         public override void Initialize(GameResources resources)
@@ -27,6 +29,17 @@ namespace ShogiClient
             {
                 Game.SetCurrentScreen(new GameplayScreen(Game));
             };
+
+            exitGameButton = new UIButton(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y * 3 / 5),
+                Size = new Vector2(200, 100),
+                Text = "Quit",
+            };
+            exitGameButton.OnClick += () =>
+            {
+                Game.Exit();
+            };
         }
 
         public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
@@ -37,6 +50,7 @@ namespace ShogiClient
             }
 
             startGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            exitGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -47,6 +61,7 @@ namespace ShogiClient
             spriteBatch.Draw(Resources.Logo, logoPosition - Resources.Logo.Bounds.Size.ToVector2(), null, Color.White, 0, Vector2.Zero, 2, SpriteEffects.None, 0);
 
             startGameButton.Draw(spriteBatch);
+            exitGameButton.Draw(spriteBatch);
         }
     }
 }
