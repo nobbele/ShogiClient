@@ -109,6 +109,9 @@ namespace ShogiClient
             var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed);
             var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && prevMouseState.RightButton == ButtonState.Pressed;
 
+            (PieceType type, bool promoted, int xFrom, int yFrom, int xTarget, int yTarget, PieceType? captured)? moveNotationData = null;
+            (PieceType type, int X, int Y)? dropNotationData = null;
+
             if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.State.HeldPiece != null)
             {
                 bool failedToPlace = false;
@@ -118,7 +121,7 @@ namespace ShogiClient
                 {
                     if (board.State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
-                        if (!board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured, tryPromote))
+                        if (!board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured))
                         {
                             failedToPlace = true;
                         }
@@ -134,6 +137,9 @@ namespace ShogiClient
                             {
                                 tryPromote = true;
                             }
+
+                            var piece = State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y);
+                            moveNotationData = (piece.Type, piece.Promoted, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
                         }
                     }
                     else
@@ -141,6 +147,10 @@ namespace ShogiClient
                         if (!board.State.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
                         {
                             failedToPlace = true;
+                        }
+                        else
+                        {
+                            dropNotationData = (State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y).Type, boardIndex.X, boardIndex.Y);
                         }
                     }
                 }
@@ -153,6 +163,7 @@ namespace ShogiClient
                 {
                     Resources.RandomPiecePlaceSFX.Play(0.5f, 0, 0);
 
+                    var didPromote = false;
                     if (tryPromote)
                     {
                         // Third last and third row respectively
@@ -166,7 +177,10 @@ namespace ShogiClient
                         {
                             var promotePiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y);
                             if (Utils.CanPromotePieceType(promotePiece.Type))
+                            {
                                 board.State.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
+                                didPromote = true;
+                            }
                         }
                     }
 
@@ -174,15 +188,34 @@ namespace ShogiClient
 
                     State.isCheck = false;
 
+                    bool isCheckMate = false;
                     if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
                     {
                         State.isCheck = true;
                         if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
                         {
-                            var currentGraphic = Game.Screenshot();
-                            Game.SetCurrentScreen(new ResultScreen(Game, State, currentGraphic), false);
-                            return;
+                            isCheckMate = true;
                         }
+                    }
+
+                    string notationText = null;
+                    if (moveNotationData != null)
+                    {
+                        var data = moveNotationData.Value;
+                        notationText = Utils.MoveNotation(data.type, data.promoted, data.xFrom, data.yFrom, data.xTarget, data.yTarget, data.captured, didPromote, State.isCheck);
+                    }
+                    else if (dropNotationData != null)
+                    {
+                        // TODO
+                    }
+
+                    System.Console.WriteLine(notationText);
+
+                    if (isCheckMate)
+                    {
+                        var currentGraphic = Game.Screenshot();
+                        Game.SetCurrentScreen(new ResultScreen(Game, State, currentGraphic), false);
+                        return;
                     }
                 }
                 else

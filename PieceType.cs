@@ -7,7 +7,6 @@ namespace ShogiClient
         Knight,
         Silver,
         Gold,
-        Horse,
         Bishop,
         Rook,
         King,

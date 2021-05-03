@@ -7,29 +7,84 @@ namespace ShogiClient
     public static class Utils
     {
         /// <summary>
-        ///   Converts <paramref name="c"/> to the corresponding <see cref="PieceType"/> enumeration
+        ///   Converts <paramref name="c"/> to the corresponding <see cref="PieceType"/> enumeration and promotion status
         /// </summary>
         /// <param name="c">The character to be used in the convertion.</param>
         /// <returns>
-        ///   The <see cref="PieceType"/> corresponding to <paramref name="c"/> if it's found.
+        ///   The <see cref="PieceType"/> and promotion status corresponding to <paramref name="c"/> if it's found.
         ///   If an empty character is passed, it's assumed to be a non-piece and so returns null.
         /// </returns>
         /// <remarks>
         ///   Note, an empty and an invalid piece type are very different, passing an invalid piece type which will throw an exception while an empty one will return null.
         /// </remarks>
-        public static PieceType? PieceNotationToPieceType(char c) => c switch
+        public static (PieceType type, bool promoted)? PieceNotationToPieceType(char c)
         {
-            'P' => PieceType.Pawn,
-            'B' => PieceType.Bishop,
-            'R' => PieceType.Rook,
-            'L' => PieceType.Lance,
-            'N' => PieceType.Knight,
-            'S' => PieceType.Silver,
-            'G' => PieceType.Gold,
-            'K' => PieceType.King,
-            ' ' => null,
-            _ => throw new System.Exception("Unknown Piece Type"),
-        };
+            PieceType? type = char.ToUpper(c) switch
+            {
+                'P' => PieceType.Pawn,
+                'B' => PieceType.Bishop,
+                'R' => PieceType.Rook,
+                'L' => PieceType.Lance,
+                'N' => PieceType.Knight,
+                'S' => PieceType.Silver,
+                'G' => PieceType.Gold,
+                'K' => PieceType.King,
+                ' ' => null,
+                _ => throw new ArgumentException("Unknown Piece Type"),
+            };
+
+            if (type == null)
+            {
+                return null;
+            }
+
+            return ((PieceType, bool)?)(type, char.IsUpper(c));
+        }
+
+        // TODO Documentation
+        public static char PieceTypeToNotationChar(PieceType type, bool promoted)
+        {
+            var character = type switch
+            {
+                PieceType.Pawn => 'P',
+                PieceType.Bishop => 'B',
+                PieceType.Rook => 'R',
+                PieceType.Lance => 'L',
+                PieceType.Knight => 'N',
+                PieceType.Silver => 'S',
+                PieceType.Gold => 'G',
+                PieceType.King => 'K',
+                _ => throw new ArgumentException(),
+            };
+
+            if (promoted)
+                return char.ToUpper(character);
+            else
+                return char.ToLower(character);
+        }
+
+        // TODO Documentation
+        public static string MoveNotation(PieceType type, bool promoted, int xFrom, int yFrom, int xTarget, int yTarget, PieceType? captured, bool didPromote, bool causedCheck)
+            => $@"
+                {PieceTypeToNotationChar(type, promoted)}
+                {xFrom}
+                {yFrom}
+                x
+                {xTarget}
+                {yTarget}
+                {(captured != null
+                    ? $"*{PieceTypeToNotationChar(type, false)}"
+                    : string.Empty
+                )}
+                {(didPromote
+                    ? "+"
+                    : string.Empty
+                )}
+                {(didPromote
+                    ? "#"
+                    : string.Empty
+                )}
+            ".Replace(Environment.NewLine, string.Empty).Replace(" ", string.Empty).Replace("\t", string.Empty);
 
         /// <summary>
         ///   Converts <paramref name="type"/> to the corresponding Kanji used to identify the piece.
