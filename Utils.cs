@@ -67,10 +67,10 @@ namespace ShogiClient
         public static string MoveNotation(PieceType type, bool promoted, int xFrom, int yFrom, int xTarget, int yTarget, PieceType? captured, bool didPromote, bool causedCheck)
             => $@"
                 {PieceTypeToNotationChar(type, promoted)}
-                {xFrom}
+                {(char)('A' + xFrom)}
                 {yFrom}
                 x
-                {xTarget}
+                {(char)('A' + xTarget)}
                 {yTarget}
                 {(captured != null
                     ? $"*{PieceTypeToNotationChar(type, false)}"
@@ -80,7 +80,7 @@ namespace ShogiClient
                     ? "+"
                     : string.Empty
                 )}
-                {(didPromote
+                {(causedCheck
                     ? "#"
                     : string.Empty
                 )}
