@@ -86,6 +86,9 @@ namespace ShogiClient
                 )}
             ".Replace(Environment.NewLine, string.Empty).Replace(" ", string.Empty).Replace("\t", string.Empty);
 
+        public static string DropNotation(PieceType type, int xTarget, int yTarget)
+            => $"V{PieceTypeToNotationChar(type, false)}{(char)('A' + xTarget)}{yTarget}";
+
         /// <summary>
         ///   Converts <paramref name="type"/> to the corresponding Kanji used to identify the piece.
         /// </summary>

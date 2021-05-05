@@ -206,7 +206,8 @@ namespace ShogiClient
                     }
                     else if (dropNotationData != null)
                     {
-                        // TODO
+                        var data = dropNotationData.Value;
+                        notationText = Utils.DropNotation(data.type, data.X, data.Y);
                     }
 
                     System.Console.WriteLine(notationText);
