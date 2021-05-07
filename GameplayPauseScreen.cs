@@ -11,6 +11,7 @@ namespace ShogiClient
         private Texture2D background;
 
         private UIPanel panel;
+        private UIButton continueGameButton;
         private UIButton restartGameButton;
         private UIButton goBackButton;
 
@@ -25,9 +26,21 @@ namespace ShogiClient
                 Size = Game.WindowSize - new Vector2(200, 200),
             };
 
+            continueGameButton = new UIButton(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X / 2, 250),
+                Size = new Vector2(200, 100),
+                Text = "Continue",
+            };
+            continueGameButton.OnClick += () =>
+            {
+                var gameplayScreen = new GameplayScreen(Game);
+                gameplayScreen.State = gameplayState;
+                Game.SetCurrentScreen(gameplayScreen, false);
+            };
             restartGameButton = new UIButton(resources)
             {
-                Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y * 2 / 5),
+                Position = new Vector2(Game.WindowSize.X / 2, 360),
                 Size = new Vector2(200, 100),
                 Text = "Restart",
             };
@@ -38,9 +51,9 @@ namespace ShogiClient
 
             goBackButton = new UIButton(resources)
             {
-                Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y * 3 / 5),
+                Position = new Vector2(Game.WindowSize.X / 2, 470),
                 Size = new Vector2(200, 100),
-                Text = "Go back to main menu",
+                Text = "Go back",
             };
             goBackButton.OnClick += () =>
             {
@@ -58,6 +71,7 @@ namespace ShogiClient
                 return;
             }
 
+            continueGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             restartGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             goBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
@@ -66,7 +80,8 @@ namespace ShogiClient
         {
             spriteBatch.Draw(background, new Rectangle(Point.Zero, Game.WindowSize.ToPoint()), null, Color.White);
             panel.Draw(spriteBatch);
-            spriteBatch.DrawString(Resources.PieceFont, "Paused", new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y / 5) - Resources.PieceFont.MeasureString("Paused") / 2, Color.White);
+            spriteBatch.DrawString(Resources.PieceFont, "Paused", new Vector2(Game.WindowSize.X / 2, 150) - Resources.PieceFont.MeasureString("Paused") / 2, Color.White);
+            continueGameButton.Draw(spriteBatch);
             restartGameButton.Draw(spriteBatch);
             goBackButton.Draw(spriteBatch);
         }

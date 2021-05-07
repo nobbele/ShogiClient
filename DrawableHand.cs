@@ -39,7 +39,7 @@ namespace ShogiClient
             {
                 var tilePosition = Position - Size / 2 + GetTileOffsetFor(x);
 
-                spriteBatch.Draw(resources.Tile, tilePosition - resources.Tile.Bounds.Size.ToVector2() * Scale / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                spriteBatch.Draw(resources.Tile, tilePosition, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
                 if (PlayerData.Hand.Count > x)
                 {
                     PieceType type = PlayerData.Hand[x];

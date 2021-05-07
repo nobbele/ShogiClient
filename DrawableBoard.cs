@@ -27,7 +27,7 @@ namespace ShogiClient
 
         public (int X, int Y) GetTileForCoordinate(Vector2 position)
         {
-            var topLeft = Position - Size / 2 - TileSize / 2;
+            var topLeft = Position - Size / 2;
             var positionOnBoard = position - topLeft;
             int tileX = (int)Math.Floor(positionOnBoard.X / TileSize.X);
             int tileY = (int)Math.Floor(positionOnBoard.Y / TileSize.Y);
@@ -70,18 +70,18 @@ namespace ShogiClient
                 {
                     var tilePosition = Position - Size / 2 + GetTileOffsetFor(x, y);
 
-                    spriteBatch.Draw(resources.Tile, tilePosition - resources.Tile.Bounds.Size.ToVector2() * Scale / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                    spriteBatch.Draw(resources.Tile, tilePosition, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
 
                     var piece = State.Data.GetAt(x, y);
                     if (piece != null)
                     {
-                        DrawPiece(spriteBatch, piece, tilePosition);
+                        DrawPiece(spriteBatch, piece, tilePosition + TileSize / 2);
                     }
 
 #pragma warning disable CS0162
                     if (Game1.DEBUG_DISPLAY)
                     {
-                        spriteBatch.DrawString(resources.PieceFont, $"{x},{y}", tilePosition - resources.Tile.Bounds.Size.ToVector2() * Scale / 2, Color.Snow);
+                        spriteBatch.DrawString(resources.PieceFont, $"{x},{y}", tilePosition, Color.Snow);
                     }
 #pragma warning restore CS0162
                 }
@@ -103,7 +103,8 @@ namespace ShogiClient
                 {
                     var indicatorPosition = Position
                         - Size / 2
-                        + GetTileOffsetFor(validMove.X, validMove.Y);
+                        + GetTileOffsetFor(validMove.X, validMove.Y)
+                        + TileSize / 2;
                     spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
                 }
 

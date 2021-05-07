@@ -72,6 +72,7 @@ namespace ShogiClient
             Data = new Grid<PieceData>(width, height);
             // The variable is ordered from bottom-up but arrays are accessed from top-to-bottom so it needs to be read in reverse
             // it makes more sense to this for readability purposes
+
             var setup = new string[] {
                 "ppppppppp",
                 " b     r ",
@@ -80,7 +81,7 @@ namespace ShogiClient
 
             for (int y = 0; y < setup.Length; y++)
             {
-                for (int x = 0; x < Data.Width; x++)
+                for (int x = 0; x < setup[0].Length; x++)
                 {
                     // Read in reverse, bottom up
                     var c = setup[setup.Length - y - 1][x];
@@ -90,13 +91,13 @@ namespace ShogiClient
                         Data.SetAt(Data.Width - x - 1, y, new PieceData()
                         {
                             Type = type.type,
-                            Promoted = type.promoted,
+                            Promoted = type.promoted && Utils.CanPromotePieceType(type.type),
                             IsPlayerOne = false,
                         });
                         Data.SetAt(x, Data.Height - y - 1, new PieceData()
                         {
                             Type = type.type,
-                            Promoted = type.promoted,
+                            Promoted = type.promoted && Utils.CanPromotePieceType(type.type),
                             IsPlayerOne = true,
                         });
                     }

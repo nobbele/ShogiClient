@@ -12,6 +12,10 @@ namespace ShogiClient
         private DrawableHand playerTwoHand;
         private DrawableHand currentPlayerHand => State.IsPlayerOneTurn ? playerOneHand : playerTwoHand;
         private UIPanel CheckPanel;
+        private UIButton pauseButton;
+        private UIButton helpButton;
+
+        // TODO Help menu
 
         public GameplayScreen(Game1 game) : base(game)
         {
@@ -45,7 +49,29 @@ namespace ShogiClient
             {
                 Position = Vector2.Zero,
                 Size = Game.WindowSize,
-                Color = new Color(Color.DarkRed, 0.001f),
+                Color = new Color(Color.DarkRed, 0.0001f),
+            };
+            pauseButton = new UIButton(Resources)
+            {
+                Position = new Vector2(100, 50),
+                Size = new Vector2(100, 50),
+                Text = "Pause"
+            };
+            pauseButton.OnClick += () =>
+            {
+                var currentGraphic = Game.Screenshot();
+                Game.SetCurrentScreen(new GameplayPauseScreen(Game, Resources, State, currentGraphic), false);
+            };
+            helpButton = new UIButton(Resources)
+            {
+                Position = new Vector2(Game.WindowSize.X - 100, 50),
+                Size = new Vector2(100, 50),
+                Text = "Help"
+            };
+            helpButton.OnClick += () =>
+            {
+                var currentGraphic = Game.Screenshot();
+                Game.SetCurrentScreen(new GameplayHelpScreen(Game, Resources, State, currentGraphic), false);
             };
 
             if (MediaPlayer.State == MediaState.Stopped)
@@ -237,6 +263,9 @@ namespace ShogiClient
             {
                 board.State.HeldPiecePosition = mousePosition;
             }
+
+            pauseButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            helpButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -249,6 +278,9 @@ namespace ShogiClient
             {
                 CheckPanel.Draw(spriteBatch);
             }
+
+            pauseButton.Draw(spriteBatch);
+            helpButton.Draw(spriteBatch);
         }
     }
 }
