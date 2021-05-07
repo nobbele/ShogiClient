@@ -279,6 +279,23 @@ namespace ShogiClient
 
             pauseButton.Draw(spriteBatch);
             helpButton.Draw(spriteBatch);
+
+            var tableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, false)} - Pawn
+{Utils.PieceTypeToKanji(PieceType.Bishop, true, false)} - Bishop
+{Utils.PieceTypeToKanji(PieceType.Rook, true, false)} - Rook
+{Utils.PieceTypeToKanji(PieceType.Lance, true, false)} - Lance
+{Utils.PieceTypeToKanji(PieceType.Knight, true, false)} - Knight
+{Utils.PieceTypeToKanji(PieceType.Silver, true, false)} - Silver
+{Utils.PieceTypeToKanji(PieceType.Gold, true, false)} - Gold
+{Utils.PieceTypeToKanji(PieceType.King, true, false)}/{Utils.PieceTypeToKanji(PieceType.King, false, false)} - King";
+            spriteBatch.DrawString(Resources.PieceFont, tableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 2 / 6) - Resources.PieceFont.MeasureString(tableText) / 2, Color.White);
+            var promotedTableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, false)} - Pawn
+{Utils.PieceTypeToKanji(PieceType.Bishop, true, true)} - Bishop
+{Utils.PieceTypeToKanji(PieceType.Rook, true, true)} - Rook
+{Utils.PieceTypeToKanji(PieceType.Lance, true, true)} - Lance
+{Utils.PieceTypeToKanji(PieceType.Knight, true, true)} - Knight
+{Utils.PieceTypeToKanji(PieceType.Silver, true, true)} - Silver";
+            spriteBatch.DrawString(Resources.PieceFont, promotedTableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 4 / 6) - Resources.PieceFont.MeasureString(promotedTableText) / 2, Color.Red);
         }
     }
 }
