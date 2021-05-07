@@ -15,8 +15,6 @@ namespace ShogiClient
         private UIButton pauseButton;
         private UIButton helpButton;
 
-        // TODO Help menu
-
         public GameplayScreen(Game1 game) : base(game)
         {
 
