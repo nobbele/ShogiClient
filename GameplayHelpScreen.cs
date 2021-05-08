@@ -29,6 +29,7 @@ namespace ShogiClient
             helpPages = new HelpPage[] {
                 new HelpPage1(resources, game),
                 new HelpPage2(resources, game),
+                new HelpPage3(resources, game),
             };
 
             prevButton = new UIButton(resources)
