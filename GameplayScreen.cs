@@ -228,6 +228,7 @@ namespace ShogiClient
                             moveData.DidPromote = didPromote;
                         }
                         System.Console.WriteLine(turnData.ToNotation());
+                        State.TurnList.Add(turnData);
                     }
 
                     if (isCheckMate)
