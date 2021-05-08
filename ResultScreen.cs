@@ -38,7 +38,7 @@ namespace ShogiClient
             panel.Draw(spriteBatch);
 
             var winner = gameplayState.IsPlayerOneTurn ? "Player 2" : "Player 1";
-            var winnerText = $"{winner} Won!";
+            var winnerText = $"{winner} Won after {gameplayState.TurnList.Count} turns!";
             spriteBatch.DrawString(Resources.PieceFont, winnerText, Game.WindowSize / 2 - Resources.PieceFont.MeasureString(winnerText) / 2, Color.White);
         }
     }
