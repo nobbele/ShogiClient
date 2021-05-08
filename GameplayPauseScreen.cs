@@ -14,6 +14,7 @@ namespace ShogiClient
         private UIButton continueGameButton;
         private UIButton restartGameButton;
         private UIButton goBackButton;
+        private UIText pausedText;
 
         public GameplayPauseScreen(Game1 game, GameResources resources, GameplayScreenState gameplayState, Texture2D background) : base(game)
         {
@@ -59,6 +60,12 @@ namespace ShogiClient
             {
                 Game.SetCurrentScreen(new MainMenuScreen(game));
             };
+
+            pausedText = new UIText(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X / 2, 150),
+                Text = "Paused",
+            };
         }
 
         public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
@@ -80,7 +87,7 @@ namespace ShogiClient
         {
             spriteBatch.Draw(background, new Rectangle(Point.Zero, Game.WindowSize.ToPoint()), null, Color.White);
             panel.Draw(spriteBatch);
-            spriteBatch.DrawString(Resources.PieceFont, "Paused", new Vector2(Game.WindowSize.X / 2, 150) - Resources.PieceFont.MeasureString("Paused") / 2, Color.White);
+            pausedText.Draw(spriteBatch);
             continueGameButton.Draw(spriteBatch);
             restartGameButton.Draw(spriteBatch);
             goBackButton.Draw(spriteBatch);

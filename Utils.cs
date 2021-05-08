@@ -63,32 +63,6 @@ namespace ShogiClient
                 return char.ToLower(character);
         }
 
-        // TODO Documentation
-        public static string MoveNotation(PieceType type, bool promoted, int xFrom, int yFrom, int xTarget, int yTarget, PieceType? captured, bool didPromote, bool causedCheck)
-            => $@"
-                {PieceTypeToNotationChar(type, promoted)}
-                {(char)('A' + xFrom)}
-                {yFrom}
-                x
-                {(char)('A' + xTarget)}
-                {yTarget}
-                {(captured != null
-                    ? $"*{PieceTypeToNotationChar(type, false)}"
-                    : string.Empty
-                )}
-                {(didPromote
-                    ? "+"
-                    : string.Empty
-                )}
-                {(causedCheck
-                    ? "#"
-                    : string.Empty
-                )}
-            ".Replace(Environment.NewLine, string.Empty).Replace(" ", string.Empty).Replace("\t", string.Empty);
-
-        public static string DropNotation(PieceType type, int xTarget, int yTarget)
-            => $"V{PieceTypeToNotationChar(type, false)}{(char)('A' + xTarget)}{yTarget}";
-
         /// <summary>
         ///   Converts <paramref name="type"/> to the corresponding Kanji used to identify the piece.
         /// </summary>

@@ -133,8 +133,7 @@ namespace ShogiClient
             var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed);
             var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && prevMouseState.RightButton == ButtonState.Pressed;
 
-            (PieceType type, bool promoted, int xFrom, int yFrom, int xTarget, int yTarget, PieceType? captured)? moveNotationData = null;
-            (PieceType type, int X, int Y)? dropNotationData = null;
+            ITurn turnData = null;
 
             if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.State.HeldPiece != null)
             {
@@ -163,7 +162,7 @@ namespace ShogiClient
                             }
 
                             var piece = State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y);
-                            moveNotationData = (piece.Type, piece.Promoted, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
+                            turnData = new MoveTurn(piece.Type, piece.Promoted, false, false, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
                         }
                     }
                     else
@@ -174,7 +173,7 @@ namespace ShogiClient
                         }
                         else
                         {
-                            dropNotationData = (State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y).Type, boardIndex.X, boardIndex.Y);
+                            turnData = new DropTurn(State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y).Type, boardIndex.X, boardIndex.Y, false);
                         }
                     }
                 }
@@ -211,7 +210,6 @@ namespace ShogiClient
                     State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
 
                     State.isCheck = false;
-
                     bool isCheckMate = false;
                     if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
                     {
@@ -222,19 +220,15 @@ namespace ShogiClient
                         }
                     }
 
-                    string notationText = null;
-                    if (moveNotationData != null)
+                    if (turnData != null)
                     {
-                        var data = moveNotationData.Value;
-                        notationText = Utils.MoveNotation(data.type, data.promoted, data.xFrom, data.yFrom, data.xTarget, data.yTarget, data.captured, didPromote, State.isCheck);
+                        turnData.DidCheck = State.isCheck;
+                        if (turnData is MoveTurn moveData)
+                        {
+                            moveData.DidPromote = didPromote;
+                        }
+                        System.Console.WriteLine(turnData.ToNotation());
                     }
-                    else if (dropNotationData != null)
-                    {
-                        var data = dropNotationData.Value;
-                        notationText = Utils.DropNotation(data.type, data.X, data.Y);
-                    }
-
-                    System.Console.WriteLine(notationText);
 
                     if (isCheckMate)
                     {
