@@ -24,7 +24,7 @@ namespace ShogiClient
         {
             base.Initialize(resources);
 
-            board = new DrawableBoard(resources, State.boardState)
+            board = new DrawableBoard(resources, State.BoardState)
             {
                 Position = Game.WindowSize / 2,
                 Scale = new Vector2(2f, 2f),
@@ -32,14 +32,14 @@ namespace ShogiClient
 
             playerOneHand = new DrawableHand(resources)
             {
-                PlayerData = State.playerOne,
+                PlayerData = State.PlayerOne,
                 Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y - 50),
                 Scale = new Vector2(1.5f)
             };
 
             playerTwoHand = new DrawableHand(resources)
             {
-                PlayerData = State.playerTwo,
+                PlayerData = State.PlayerTwo,
                 Position = new Vector2(Game.WindowSize.X / 2, 50),
                 Scale = new Vector2(1.5f)
             };
@@ -161,7 +161,7 @@ namespace ShogiClient
                                 tryPromote = true;
                             }
 
-                            var piece = State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y);
+                            var piece = State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y);
                             turnData = new MoveTurn(piece.Type, piece.Promoted, false, false, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
                         }
                     }
@@ -173,7 +173,7 @@ namespace ShogiClient
                         }
                         else
                         {
-                            turnData = new DropTurn(State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y).Type, boardIndex.X, boardIndex.Y, false);
+                            turnData = new DropTurn(State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y).Type, boardIndex.X, boardIndex.Y, false);
                         }
                     }
                 }
@@ -209,11 +209,11 @@ namespace ShogiClient
 
                     State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
 
-                    State.isCheck = false;
+                    State.IsCheck = false;
                     bool isCheckMate = false;
                     if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
                     {
-                        State.isCheck = true;
+                        State.IsCheck = true;
                         if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
                         {
                             isCheckMate = true;
@@ -222,7 +222,7 @@ namespace ShogiClient
 
                     if (turnData != null)
                     {
-                        turnData.DidCheck = State.isCheck;
+                        turnData.DidCheck = State.IsCheck;
                         if (turnData is MoveTurn moveData)
                         {
                             moveData.DidPromote = didPromote;
@@ -266,7 +266,7 @@ namespace ShogiClient
             board.Draw(spriteBatch);
             playerOneHand.Draw(spriteBatch);
             playerTwoHand.Draw(spriteBatch);
-            if (State.isCheck)
+            if (State.IsCheck)
             {
                 CheckPanel.Draw(spriteBatch);
             }
