@@ -14,6 +14,7 @@ namespace ShogiClient
         private UIPanel CheckPanel;
         private UIButton pauseButton;
         private UIButton helpButton;
+        private UITable turnTable;
 
         public GameplayScreen(Game1 game) : base(game)
         {
@@ -70,6 +71,14 @@ namespace ShogiClient
             {
                 var currentGraphic = Game.Screenshot();
                 Game.SetCurrentScreen(new GameplayHelpScreen(Game, Resources, State, currentGraphic), false);
+            };
+
+            turnTable = new UITable(Game, Resources)
+            {
+                Position = new Vector2(Game.WindowSize.X * 4 / 5, Game.WindowSize.Y / 2),
+                Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 3),
+                Data = new Grid<string>(2, 5),
+                EntryHeight = 15,
             };
 
             if (MediaPlayer.State == MediaState.Stopped)
@@ -228,6 +237,7 @@ namespace ShogiClient
                             moveData.DidPromote = didPromote;
                         }
                         System.Console.WriteLine(turnData.ToNotation());
+                        turnTable.Data.SetAt(State.TurnList.Count % 2, State.TurnList.Count / 2, turnData.ToNotation());
                         State.TurnList.Add(turnData);
                     }
 
@@ -274,6 +284,8 @@ namespace ShogiClient
 
             pauseButton.Draw(spriteBatch);
             helpButton.Draw(spriteBatch);
+
+            turnTable.Draw(spriteBatch);
 
             var tableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, false)} - Pawn
 {Utils.PieceTypeToKanji(PieceType.Bishop, true, false)} - Bishop
