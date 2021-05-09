@@ -8,6 +8,7 @@ namespace ShogiClient
         public Vector2 Position { get; set; }
         public Vector2 Size { get; set; }
         public Color PanelColor { get; set; } = new Color(Color.Black, 0.6f);
+        public Color BorderColor { get; set; } = Color.White;
         public Grid<string> Data { get; set; }
         public int EntryHeight;
 
@@ -44,6 +45,17 @@ namespace ShogiClient
                     }
                 }
             }
+
+            for (int y = 0; y < (Size.Y / EntryHeight); y++)
+            {
+                var horLinePosition = new Vector2(Position.X, Position.Y + EntryHeight * y)
+                    - Size / 2;
+                spriteBatch.Draw(tex, new Rectangle(horLinePosition.ToPoint(), new Point(entryWidth * 2, 1)), null, BorderColor);
+            }
+
+            var verLinePosition = new Vector2(Position.X + entryWidth, Position.Y)
+                - Size / 2;
+            spriteBatch.Draw(tex, new Rectangle(verLinePosition.ToPoint(), new Point(1, (int)Size.Y)), null, BorderColor);
         }
     }
 }
