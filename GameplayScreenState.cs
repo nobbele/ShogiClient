@@ -14,6 +14,7 @@ namespace ShogiClient
         }
 
         public bool IsCheck = false;
+        public bool IsCheckMate = false;
 
         public PlayerData PlayerOne = new PlayerData();
         public PlayerData PlayerTwo = new PlayerData();

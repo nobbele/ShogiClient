@@ -27,7 +27,7 @@ namespace ShogiClient
         /// <summary>
         ///   Removes a piece from the HeldPiece property and puts it on the board.
         /// </summary>
-        public bool PlacePiece(int fromX, int fromY, int targetX, int targetY, out PieceType? captured)
+        public bool PlacePiece(int fromX, int fromY, int targetX, int targetY, out PieceData captured)
         {
             captured = null;
 
@@ -39,7 +39,7 @@ namespace ShogiClient
             var piece = Data.GetAt(targetX, targetY);
             if (piece != null)
             {
-                captured = piece.Type;
+                captured = piece;
             }
             PlacePiece(targetX, targetY);
             return true;

@@ -15,6 +15,7 @@ namespace ShogiClient
         private UIButton pauseButton;
         private UIButton helpButton;
         private UITable turnTable;
+        private UIButton takeBackButton;
 
         public GameplayScreen(Game1 game) : base(game)
         {
@@ -81,6 +82,33 @@ namespace ShogiClient
                 EntryHeight = 15,
             };
 
+            takeBackButton = new UIButton(Resources)
+            {
+                Position = new Vector2(Game.WindowSize.X - 100, Game.WindowSize.Y / 2),
+                Size = new Vector2(100, 50),
+                Text = "Take back",
+            };
+            takeBackButton.OnClick += () =>
+            {
+                if (State.TurnList.Count > 0)
+                {
+                    var lastTurn = State.TurnList[State.TurnList.Count - 1];
+                    turnTable.Data.SetAt((State.TurnList.Count - 1) % 2, (State.TurnList.Count - 1) / 2, null);
+                    State.TurnList.RemoveAt(State.TurnList.Count - 1);
+                    if (lastTurn is MoveTurn moveTurn)
+                    {
+                        State.BoardState.Data.SetAt(moveTurn.XFrom, moveTurn.YFrom, moveTurn.Piece);
+                        State.BoardState.Data.SetAt(moveTurn.XTarget, moveTurn.YTarget, moveTurn.Captured);
+                    }
+                    else if (lastTurn is DropTurn dropTurn)
+                    {
+
+                    }
+
+                    EndOfTurnChecks();
+                }
+            };
+
             if (MediaPlayer.State == MediaState.Stopped)
             {
                 MediaPlayer.Play(Resources.RandomGameplaySong);
@@ -142,27 +170,25 @@ namespace ShogiClient
             var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed);
             var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && prevMouseState.RightButton == ButtonState.Pressed;
 
-            ITurn turnData = null;
-
             if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.State.HeldPiece != null)
             {
                 bool failedToPlace = false;
                 var tryPromote = false;
+                ITurn turnData = null;
 
                 if (board.State.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
                 {
                     if (board.State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                     {
-                        if (!board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured))
+                        if (!board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceData captured))
                         {
                             failedToPlace = true;
                         }
                         else
                         {
-                            // If there was a captured piece, not null
-                            if (captured is PieceType type)
+                            if (captured != null)
                             {
-                                State.CurrentPlayer.Hand.Add(type);
+                                State.CurrentPlayer.Hand.Add(captured.Type);
                             }
 
                             if (rightMouseButtonReleased)
@@ -171,7 +197,7 @@ namespace ShogiClient
                             }
 
                             var piece = State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y);
-                            turnData = new MoveTurn(piece.Type, piece.Promoted, false, false, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
+                            turnData = new MoveTurn(piece, false, false, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
                         }
                     }
                     else
@@ -195,7 +221,7 @@ namespace ShogiClient
                 {
                     Resources.RandomPiecePlaceSFX.Play(0.5f, 0, 0);
 
-                    var didPromote = false;
+                    bool didPromote = false;
                     if (tryPromote)
                     {
                         // Third last and third row respectively
@@ -216,18 +242,7 @@ namespace ShogiClient
                         }
                     }
 
-                    State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
-
-                    State.IsCheck = false;
-                    bool isCheckMate = false;
-                    if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
-                    {
-                        State.IsCheck = true;
-                        if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
-                        {
-                            isCheckMate = true;
-                        }
-                    }
+                    EndOfTurnChecks();
 
                     if (turnData != null)
                     {
@@ -241,7 +256,7 @@ namespace ShogiClient
                         State.TurnList.Add(turnData);
                     }
 
-                    if (isCheckMate)
+                    if (State.IsCheckMate)
                     {
                         var currentGraphic = Game.Screenshot();
                         Game.SetCurrentScreen(new ResultScreen(Game, State, currentGraphic), false);
@@ -269,6 +284,23 @@ namespace ShogiClient
 
             pauseButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             helpButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            takeBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+        }
+
+        public void EndOfTurnChecks()
+        {
+            State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
+
+            State.IsCheck = false;
+            State.IsCheckMate = false;
+            if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
+            {
+                State.IsCheck = true;
+                if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
+                {
+                    State.IsCheckMate = true;
+                }
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -284,6 +316,7 @@ namespace ShogiClient
 
             pauseButton.Draw(spriteBatch);
             helpButton.Draw(spriteBatch);
+            takeBackButton.Draw(spriteBatch);
 
             turnTable.Draw(spriteBatch);
 

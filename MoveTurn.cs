@@ -4,20 +4,18 @@ namespace ShogiClient
 {
     public struct MoveTurn : ITurn
     {
-        public PieceType Type { get; set; }
-        public bool Promoted { get; set; }
+        public PieceData Piece { get; set; }
         public bool DidPromote { get; set; }
         public bool DidCheck { get; set; }
         public int XFrom { get; set; }
         public int YFrom { get; set; }
         public int XTarget { get; set; }
         public int YTarget { get; set; }
-        public PieceType? Captured { get; set; }
+        public PieceData Captured { get; set; }
 
-        public MoveTurn(PieceType type, bool promoted, bool didCheck, bool didPromote, int xFrom, int yFrom, int xTarget, int yTarget, PieceType? captured)
+        public MoveTurn(PieceData piece, bool didCheck, bool didPromote, int xFrom, int yFrom, int xTarget, int yTarget, PieceData captured)
         {
-            Type = type;
-            Promoted = promoted;
+            Piece = piece;
             DidCheck = didCheck;
             DidPromote = didPromote;
             XFrom = xFrom;
@@ -29,14 +27,14 @@ namespace ShogiClient
 
         public string ToNotation()
             => $@"
-                {Utils.PieceTypeToNotationChar(Type, Promoted)}
+                {Utils.PieceTypeToNotationChar(Piece.Type, Piece.Promoted)}
                 {(char)('A' + XFrom)}
                 {YFrom}
                 x
                 {(char)('A' + XTarget)}
                 {YTarget}
                 {(Captured != null
-                    ? $"*{Utils.PieceTypeToNotationChar(Type, false)}"
+                    ? $"*{Utils.PieceTypeToNotationChar(Captured.Type, Captured.Promoted)}"
                     : string.Empty
                 )}
                 {(DidPromote
