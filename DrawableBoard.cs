@@ -105,7 +105,7 @@ namespace ShogiClient
                         - Size / 2
                         + GetTileOffsetFor(validMove.X, validMove.Y)
                         + TileSize / 2;
-                    spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                    spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() * Scale / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
                 }
 
                 DrawPiece(spriteBatch, State.HeldPiece, State.HeldPiecePosition);
