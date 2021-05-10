@@ -99,13 +99,17 @@ namespace ShogiClient
                     {
                         State.BoardState.Data.SetAt(moveTurn.XFrom, moveTurn.YFrom, moveTurn.Piece);
                         State.BoardState.Data.SetAt(moveTurn.XTarget, moveTurn.YTarget, moveTurn.Captured);
+                        if (moveTurn.Captured != null) {
+                            var lastTurnPlayer = State.IsPlayerOneTurn ? State.PlayerTwo : State.PlayerOne;
+                            lastTurnPlayer.Hand.Remove(moveTurn.Captured.Type);
+                        }
                     }
                     else if (lastTurn is DropTurn dropTurn)
                     {
 
                     }
 
-                    EndOfTurnChecks();
+                    EndOfTurn();
                 }
             };
 
@@ -242,7 +246,7 @@ namespace ShogiClient
                         }
                     }
 
-                    EndOfTurnChecks();
+                    EndOfTurn();
 
                     if (turnData != null)
                     {
@@ -287,7 +291,7 @@ namespace ShogiClient
             takeBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
-        public void EndOfTurnChecks()
+        public void EndOfTurn()
         {
             State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
 
