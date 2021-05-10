@@ -25,7 +25,7 @@ namespace ShogiClient
 
         public (int X, int Y) GetIndexForCoordinate(Vector2 position)
         {
-            var topLeftPlayerHand = Position - Size / 2 - TileSize / 2;
+            var topLeftPlayerHand = Position - Size / 2;
             var positionOnHand = position - topLeftPlayerHand;
             int x = (int)Math.Floor(positionOnHand.X / TileSize.X);
             int y = (int)Math.Floor(positionOnHand.Y / TileSize.Y);
@@ -53,7 +53,7 @@ namespace ShogiClient
                     spriteBatch.DrawString(
                         resources.PieceFont,
                         piecePrint,
-                        tilePosition - resources.PieceFont.MeasureString(piecePrint) / 2,
+                        tilePosition - resources.PieceFont.MeasureString(piecePrint) / 2 + resources.Tile.Bounds.Size.ToVector2() * Scale / 2,
                         Color.Black
                     );
                 }

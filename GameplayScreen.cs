@@ -78,7 +78,7 @@ namespace ShogiClient
             {
                 Position = new Vector2(Game.WindowSize.X * 4 / 5, Game.WindowSize.Y / 2),
                 Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 3),
-                Data = new Grid<string>(2, 5),
+                Data = new Grid<string>(2, 50),
                 EntryHeight = 15,
             };
 
@@ -95,17 +95,24 @@ namespace ShogiClient
                     var lastTurn = State.TurnList[State.TurnList.Count - 1];
                     turnTable.Data.SetAt((State.TurnList.Count - 1) % 2, (State.TurnList.Count - 1) / 2, null);
                     State.TurnList.RemoveAt(State.TurnList.Count - 1);
+
+                    var lastTurnPlayer = State.IsPlayerOneTurn ? State.PlayerTwo : State.PlayerOne;
+
                     if (lastTurn is MoveTurn moveTurn)
                     {
                         State.BoardState.Data.SetAt(moveTurn.XFrom, moveTurn.YFrom, moveTurn.Piece);
                         State.BoardState.Data.SetAt(moveTurn.XTarget, moveTurn.YTarget, moveTurn.Captured);
+                        if (moveTurn.Captured != null) {
+                            lastTurnPlayer.Hand.Remove(moveTurn.Captured.Type);
+                        }
                     }
                     else if (lastTurn is DropTurn dropTurn)
                     {
-
+                        State.BoardState.Data.SetAt(dropTurn.X, dropTurn.Y, null);
+                        lastTurnPlayer.Hand.Add(dropTurn.Type);
                     }
 
-                    EndOfTurnChecks();
+                    EndOfTurn();
                 }
             };
 
@@ -242,7 +249,7 @@ namespace ShogiClient
                         }
                     }
 
-                    EndOfTurnChecks();
+                    EndOfTurn();
 
                     if (turnData != null)
                     {
@@ -287,7 +294,7 @@ namespace ShogiClient
             takeBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
-        public void EndOfTurnChecks()
+        public void EndOfTurn()
         {
             State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
 
