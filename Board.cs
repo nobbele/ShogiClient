@@ -31,7 +31,7 @@ namespace ShogiClient
         {
             captured = null;
 
-            if (!Utils.ValidMovesForPiece(HeldPiece, Data, fromX, fromY).Contains((targetX, targetY)))
+            if (!Utils.ValidMovesForPiece(HeldPiece, Data, new Point(fromX, fromY)).Contains(new Point(targetX, targetY)))
             {
                 return false;
             }
@@ -50,7 +50,7 @@ namespace ShogiClient
         /// </summary>
         public bool PlacePieceFromHand(int targetX, int targetY)
         {
-            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data).Contains((targetX, targetY)))
+            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data).Contains(new Point(targetX, targetY)))
             {
                 return false;
             }

@@ -89,10 +89,10 @@ namespace ShogiClient
 
             if (State.HeldPiece != null)
             {
-                List<(int X, int Y)> validMoves;
+                List<Point> validMoves;
                 if (State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
                 {
-                    validMoves = Utils.ValidMovesForPiece(State.HeldPiece, State.Data, pickUpPosition.X, pickUpPosition.Y);
+                    validMoves = Utils.ValidMovesForPiece(State.HeldPiece, State.Data, new Point(pickUpPosition.X, pickUpPosition.Y));
                 }
                 else
                 {

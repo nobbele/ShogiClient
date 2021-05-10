@@ -71,8 +71,8 @@ namespace ShogiClient
             }
 
             var drawMovesPiece = Data.GetAt(DrawMovesPiece.X, DrawMovesPiece.Y);
-            List<(int X, int Y)> validMoves;
-            validMoves = Utils.ValidMovesForPiece(drawMovesPiece, Data, DrawMovesPiece.X, DrawMovesPiece.Y);
+            List<Point> validMoves;
+            validMoves = Utils.ValidMovesForPiece(drawMovesPiece, Data, new Point(DrawMovesPiece.X, DrawMovesPiece.Y));
             //validMoves = Utils.ValidPositionsForPieceDrop(State.HeldPiece, State.Data);
 
             foreach (var validMove in validMoves)

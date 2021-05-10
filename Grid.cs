@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace ShogiClient
 {
-    public class Grid<T> : IEnumerable<(T Content, int X, int Y)>
+    public class Grid<T> : IEnumerable<(T Content, Point Position)>
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -41,13 +42,13 @@ namespace ShogiClient
             return clone;
         }
 
-        public IEnumerator<(T Content, int X, int Y)> GetEnumerator()
+        public IEnumerator<(T Content, Point Position)> GetEnumerator()
         {
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    yield return (GetAt(x, y), x, y);
+                    yield return (GetAt(x, y), new Point(x, y));
                 }
             }
         }
