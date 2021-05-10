@@ -344,6 +344,11 @@ namespace ShogiClient
 {Utils.PieceTypeToKanji(PieceType.Knight, true, true)} - Knight
 {Utils.PieceTypeToKanji(PieceType.Silver, true, true)} - Silver";
             spriteBatch.DrawString(Resources.PieceFont, promotedTableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 4 / 6) - Resources.PieceFont.MeasureString(promotedTableText) / 2, Color.Red);
+            if (State.TurnList.Count > 0)
+            {
+                var lastMoveText = State.TurnList[State.TurnList.Count - 1].ToNotation();
+                spriteBatch.DrawString(Resources.PieceFont, lastMoveText, new Vector2(Game.WindowSize.X / 12, Game.WindowSize.Y / 2) - Resources.PieceFont.MeasureString(lastMoveText) / 2, Color.Black);
+            }
         }
     }
 }
