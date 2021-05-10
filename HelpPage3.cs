@@ -13,7 +13,7 @@ namespace ShogiClient
             goldBoard = new UIMiniBoard(resources, 5, 5)
             {
                 Position = new Vector2(Game.WindowSize.X / 3, 350),
-                DrawMovesPiece = (2, 2),
+                DrawMovesPiece = new Point(2, 2),
                 Scale = new Vector2(2f, 2f)
             };
             goldBoard.Data.SetAt(2, 2, new PieceData()
@@ -25,7 +25,7 @@ namespace ShogiClient
             kingBoard = new UIMiniBoard(resources, 5, 5)
             {
                 Position = new Vector2(Game.WindowSize.X * 2 / 3, 350),
-                DrawMovesPiece = (2, 2),
+                DrawMovesPiece = new Point(2, 2),
                 Scale = new Vector2(2f, 2f)
             };
             kingBoard.Data.SetAt(2, 2, new PieceData()

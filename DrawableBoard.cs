@@ -12,7 +12,7 @@ namespace ShogiClient
         public Vector2 Scale { get; set; } = Vector2.One;
         public Board State { get; set; }
 
-        public Vector2 Size => GetTileOffsetFor(State.Data.Width - 1, State.Data.Height - 1) + TileSize;
+        public Vector2 Size => GetTileOffsetFor(new Point(State.Data.Width - 1, State.Data.Height - 1)) + TileSize;
         public Vector2 TileSize => resources.Tile.Bounds.Size.ToVector2() * Scale;
 
         private GameResources resources;
@@ -23,16 +23,16 @@ namespace ShogiClient
             State = state;
         }
 
-        public Vector2 GetTileOffsetFor(int x, int y) => new Vector2((TileSize.X - 1) * x, (TileSize.Y - 1) * y);
+        public Vector2 GetTileOffsetFor(Point point) => new Vector2((TileSize.X - 1) * point.X, (TileSize.Y - 1) * point.Y);
 
-        public (int X, int Y) GetTileForCoordinate(Vector2 position)
+        public Point GetTileForCoordinate(Vector2 position)
         {
             var topLeft = Position - Size / 2;
             var positionOnBoard = position - topLeft;
             int tileX = (int)Math.Floor(positionOnBoard.X / TileSize.X);
             int tileY = (int)Math.Floor(positionOnBoard.Y / TileSize.Y);
 
-            return (tileX, tileY);
+            return new Point(tileX, tileY);
         }
 
         private void DrawPiece(SpriteBatch spriteBatch, PieceData piece, Vector2 tilePosition)
@@ -68,7 +68,7 @@ namespace ShogiClient
             {
                 for (int x = 0; x < State.Data.Width; x++)
                 {
-                    var tilePosition = Position - Size / 2 + GetTileOffsetFor(x, y);
+                    var tilePosition = Position - Size / 2 + GetTileOffsetFor(new Point(x, y));
 
                     spriteBatch.Draw(resources.Tile, tilePosition, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
 
@@ -90,9 +90,9 @@ namespace ShogiClient
             if (State.HeldPiece != null)
             {
                 List<Point> validMoves;
-                if (State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                if (State.HeldPiecePickUpPosition is Point pickUpPosition)
                 {
-                    validMoves = Utils.ValidMovesForPiece(State.HeldPiece, State.Data, new Point(pickUpPosition.X, pickUpPosition.Y));
+                    validMoves = Utils.ValidMovesForPiece(State.HeldPiece, State.Data, pickUpPosition);
                 }
                 else
                 {
@@ -103,7 +103,7 @@ namespace ShogiClient
                 {
                     var indicatorPosition = Position
                         - Size / 2
-                        + GetTileOffsetFor(validMove.X, validMove.Y)
+                        + GetTileOffsetFor(validMove)
                         + TileSize / 2;
                     spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() * Scale / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
                 }

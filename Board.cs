@@ -9,17 +9,17 @@ namespace ShogiClient
 
         public Vector2 HeldPiecePosition { get; set; } = new Vector2(0, 0);
         // If null, that means it's taken from the hand
-        public (int X, int Y)? HeldPiecePickUpPosition { get; set; } = null;
+        public Point? HeldPiecePickUpPosition { get; set; } = null;
 
         /// <summary>
         ///   Removes a piece from the board and puts it in the HeldPiece property.
         /// </summary>
-        public bool PickUpPiece(int x, int y, bool isPlayerOne)
+        public bool PickUpPiece(Point point, bool isPlayerOne)
         {
-            var piece = Data.GetAt(x, y);
+            var piece = Data.GetAt(point);
             if (piece == null || piece.IsPlayerOne != isPlayerOne)
                 return false;
-            Data.SetAt(x, y, null);
+            Data.SetAt(point, null);
             HeldPiece = piece;
             return true;
         }
@@ -27,43 +27,43 @@ namespace ShogiClient
         /// <summary>
         ///   Removes a piece from the HeldPiece property and puts it on the board.
         /// </summary>
-        public bool PlacePiece(int fromX, int fromY, int targetX, int targetY, out PieceData captured)
+        public bool PlacePiece(Point from, Point target, out PieceData captured)
         {
             captured = null;
 
-            if (!Utils.ValidMovesForPiece(HeldPiece, Data, new Point(fromX, fromY)).Contains(new Point(targetX, targetY)))
+            if (!Utils.ValidMovesForPiece(HeldPiece, Data, from).Contains(target))
             {
                 return false;
             }
 
-            var piece = Data.GetAt(targetX, targetY);
+            var piece = Data.GetAt(target);
             if (piece != null)
             {
                 captured = piece;
             }
-            PlacePiece(targetX, targetY);
+            PlacePiece(target);
             return true;
         }
 
         /// <summary>
         ///   Removes a piece from the hand and puts it on the board.
         /// </summary>
-        public bool PlacePieceFromHand(int targetX, int targetY)
+        public bool PlacePieceFromHand(Point target)
         {
-            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data).Contains(new Point(targetX, targetY)))
+            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data).Contains(target))
             {
                 return false;
             }
 
-            var piece = Data.GetAt(targetX, targetY);
-            PlacePiece(targetX, targetY);
+            var piece = Data.GetAt(target);
+            PlacePiece(target);
             return true;
         }
 
 
-        public void PlacePiece(int x, int y)
+        public void PlacePiece(Point point)
         {
-            Data.SetAt(x, y, HeldPiece);
+            Data.SetAt(point, HeldPiece);
             HeldPiece = null;
         }
 

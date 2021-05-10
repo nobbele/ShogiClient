@@ -14,7 +14,7 @@ namespace ShogiClient
             lanceBoard = new UIMiniBoard(resources, 5, 5)
             {
                 Position = new Vector2(Game.WindowSize.X / 4, 350),
-                DrawMovesPiece = (2, 2),
+                DrawMovesPiece = new Point(2, 2),
                 Scale = new Vector2(2f, 2f)
             };
             lanceBoard.Data.SetAt(2, 2, new PieceData()
@@ -26,7 +26,7 @@ namespace ShogiClient
             knightBoard = new UIMiniBoard(resources, 5, 5)
             {
                 Position = new Vector2(Game.WindowSize.X * 2 / 4, 350),
-                DrawMovesPiece = (2, 2),
+                DrawMovesPiece = new Point(2, 2),
                 Scale = new Vector2(2f, 2f)
             };
             knightBoard.Data.SetAt(2, 2, new PieceData()
@@ -53,7 +53,7 @@ namespace ShogiClient
             silverBoard = new UIMiniBoard(resources, 5, 5)
             {
                 Position = new Vector2(Game.WindowSize.X * 3 / 4, 350),
-                DrawMovesPiece = (2, 2),
+                DrawMovesPiece = new Point(2, 2),
                 Scale = new Vector2(2f, 2f)
             };
             silverBoard.Data.SetAt(2, 2, new PieceData()

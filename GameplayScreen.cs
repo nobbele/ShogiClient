@@ -78,7 +78,7 @@ namespace ShogiClient
             {
                 Position = new Vector2(Game.WindowSize.X * 4 / 5, Game.WindowSize.Y / 2),
                 Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 3),
-                Data = new Grid<string>(2, 50),
+                TableWidth = 2,
                 EntryHeight = 15,
             };
 
@@ -93,7 +93,7 @@ namespace ShogiClient
                 if (State.TurnList.Count > 0)
                 {
                     var lastTurn = State.TurnList[State.TurnList.Count - 1];
-                    turnTable.Data.SetAt((State.TurnList.Count - 1) % 2, (State.TurnList.Count - 1) / 2, null);
+                    turnTable.Data.RemoveAt(turnTable.Data.Count - 1);
                     State.TurnList.RemoveAt(State.TurnList.Count - 1);
 
                     var lastTurnPlayer = State.IsPlayerOneTurn ? State.PlayerTwo : State.PlayerOne;
@@ -102,7 +102,8 @@ namespace ShogiClient
                     {
                         State.BoardState.Data.SetAt(moveTurn.XFrom, moveTurn.YFrom, moveTurn.Piece);
                         State.BoardState.Data.SetAt(moveTurn.XTarget, moveTurn.YTarget, moveTurn.Captured);
-                        if (moveTurn.Captured != null) {
+                        if (moveTurn.Captured != null)
+                        {
                             lastTurnPlayer.Hand.Remove(moveTurn.Captured.Type);
                         }
                     }
@@ -143,9 +144,9 @@ namespace ShogiClient
                     boardIndex.X >= 0 && boardIndex.X < board.State.Data.Width
                     && boardIndex.Y >= 0 && boardIndex.Y < board.State.Data.Height)
                 {
-                    if (board.State.PickUpPiece(boardIndex.X, boardIndex.Y, State.IsPlayerOneTurn))
+                    if (board.State.PickUpPiece(boardIndex, State.IsPlayerOneTurn))
                     {
-                        board.State.HeldPiecePickUpPosition = (boardIndex.X, boardIndex.Y);
+                        board.State.HeldPiecePickUpPosition = boardIndex;
                         failedToPick = false;
                     }
                 }
@@ -185,9 +186,9 @@ namespace ShogiClient
 
                 if (board.State.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
                 {
-                    if (board.State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                    if (board.State.HeldPiecePickUpPosition is Point pickUpPosition)
                     {
-                        if (!board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceData captured))
+                        if (!board.State.PlacePiece(pickUpPosition, boardIndex, out PieceData captured))
                         {
                             failedToPlace = true;
                         }
@@ -209,7 +210,7 @@ namespace ShogiClient
                     }
                     else
                     {
-                        if (!board.State.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
+                        if (!board.State.PlacePieceFromHand(boardIndex))
                         {
                             failedToPlace = true;
                         }
@@ -259,7 +260,7 @@ namespace ShogiClient
                             moveData.DidPromote = didPromote;
                         }
                         System.Console.WriteLine(turnData.ToNotation());
-                        turnTable.Data.SetAt(State.TurnList.Count % 2, State.TurnList.Count / 2, turnData.ToNotation());
+                        turnTable.Data.Add(turnData.ToNotation());
                         State.TurnList.Add(turnData);
                     }
 
@@ -272,9 +273,9 @@ namespace ShogiClient
                 }
                 else
                 {
-                    if (board.State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                    if (board.State.HeldPiecePickUpPosition is Point pickUpPosition)
                     {
-                        board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y);
+                        board.State.PlacePiece(pickUpPosition);
                     }
                     else
                     {

@@ -8,11 +8,11 @@ namespace ShogiClient
     {
         public Vector2 Position { get; set; }
         public Vector2 Scale { get; set; } = Vector2.One;
-        public (int X, int Y) DrawMovesPiece { get; set; }
+        public Point DrawMovesPiece { get; set; }
 
         public Grid<PieceData> Data { get; private set; }
 
-        public Vector2 Size => GetTileOffsetFor(Data.Width - 1, Data.Height - 1) + TileSize;
+        public Vector2 Size => GetTileOffsetFor(new Point(Data.Width - 1, Data.Height - 1)) + TileSize;
         public Vector2 TileSize => resources.Tile.Bounds.Size.ToVector2() * Scale;
 
         private GameResources resources;
@@ -23,7 +23,7 @@ namespace ShogiClient
             Data = new Grid<PieceData>(width, height);
         }
 
-        public Vector2 GetTileOffsetFor(int x, int y) => new Vector2((TileSize.X - 1) * x, (TileSize.Y - 1) * y);
+        public Vector2 GetTileOffsetFor(Point point) => new Vector2((TileSize.X - 1) * point.X, (TileSize.Y - 1) * point.Y);
 
         private void DrawPiece(SpriteBatch spriteBatch, PieceData piece, Vector2 tilePosition)
         {
@@ -58,7 +58,7 @@ namespace ShogiClient
             {
                 for (int x = 0; x < Data.Width; x++)
                 {
-                    var tilePosition = Position - Size / 2 + GetTileOffsetFor(x, y);
+                    var tilePosition = Position - Size / 2 + GetTileOffsetFor(new Point(x, y));
 
                     spriteBatch.Draw(resources.Tile, tilePosition, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
 
@@ -70,16 +70,15 @@ namespace ShogiClient
                 }
             }
 
-            var drawMovesPiece = Data.GetAt(DrawMovesPiece.X, DrawMovesPiece.Y);
+            var drawMovesPiece = Data.GetAt(DrawMovesPiece);
             List<Point> validMoves;
-            validMoves = Utils.ValidMovesForPiece(drawMovesPiece, Data, new Point(DrawMovesPiece.X, DrawMovesPiece.Y));
-            //validMoves = Utils.ValidPositionsForPieceDrop(State.HeldPiece, State.Data);
+            validMoves = Utils.ValidMovesForPiece(drawMovesPiece, Data, DrawMovesPiece);
 
             foreach (var validMove in validMoves)
             {
                 var indicatorPosition = Position
                     - Size / 2
-                    + GetTileOffsetFor(validMove.X, validMove.Y)
+                    + GetTileOffsetFor(validMove)
                     + TileSize / 2;
                 spriteBatch.Draw(resources.MoveIndicator, indicatorPosition - resources.MoveIndicator.Bounds.Size.ToVector2() / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
             }

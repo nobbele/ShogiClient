@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -9,10 +10,12 @@ namespace ShogiClient
         public Vector2 Size { get; set; }
         public Color PanelColor { get; set; } = new Color(Color.Black, 0.6f);
         public Color BorderColor { get; set; } = Color.White;
-        public Grid<string> Data { get; set; }
         public int EntryHeight;
 
-        private int entryWidth => (int)(Size.X / Data.Width);
+        public int TableWidth { get; set; }
+        public List<string> Data { get; } = new List<string>();
+
+        private int entryWidth => (int)(Size.X / TableWidth);
 
         private Texture2D tex;
 
@@ -30,19 +33,16 @@ namespace ShogiClient
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(tex, new Rectangle((Position - Size / 2).ToPoint(), Size.ToPoint()), null, PanelColor);
-            for (int y = 0; y < Data.Height; y++)
+            for (int i = 0; i < Data.Count; i++)
             {
-                for (int x = 0; x < Data.Width; x++)
+                var entryData = Data[i];
+                if (entryData != null)
                 {
-                    var entryData = Data.GetAt(x, y);
-                    if (entryData != null)
-                    {
-                        var entryPosition = new Vector2(Position.X + entryWidth * x, Position.Y + EntryHeight * y)
-                            + new Vector2(entryWidth / 2, EntryHeight / 2)
-                            - resources.PieceFont.MeasureString(entryData) / 2
-                            - Size / 2;
-                        spriteBatch.DrawString(resources.PieceFont, entryData, entryPosition, Color.White);
-                    }
+                    var entryPosition = new Vector2(Position.X + entryWidth * (i % TableWidth), Position.Y + EntryHeight * (i / TableWidth))
+                        + new Vector2(entryWidth / 2, EntryHeight / 2)
+                        - resources.PieceFont.MeasureString(entryData) / 2
+                        - Size / 2;
+                    spriteBatch.DrawString(resources.PieceFont, entryData, entryPosition, Color.White);
                 }
             }
 

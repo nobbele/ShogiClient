@@ -14,7 +14,7 @@ namespace ShogiClient
             pawnBoard = new UIMiniBoard(resources, 3, 3)
             {
                 Position = new Vector2(Game.WindowSize.X / 4 - 70, 300),
-                DrawMovesPiece = (1, 1),
+                DrawMovesPiece = new Point(1, 1),
                 Scale = new Vector2(2f, 2f)
             };
             pawnBoard.Data.SetAt(1, 1, new PieceData()
@@ -26,7 +26,7 @@ namespace ShogiClient
             bishopBoard = new UIMiniBoard(resources, 5, 5)
             {
                 Position = new Vector2(Game.WindowSize.X * 2 / 4 - 60, 350),
-                DrawMovesPiece = (2, 2),
+                DrawMovesPiece = new Point(2, 2),
                 Scale = new Vector2(2f, 2f)
             };
             bishopBoard.Data.SetAt(2, 2, new PieceData()
@@ -38,7 +38,7 @@ namespace ShogiClient
             rookBoard = new UIMiniBoard(resources, 5, 5)
             {
                 Position = new Vector2(Game.WindowSize.X * 3 / 4, 350),
-                DrawMovesPiece = (2, 2),
+                DrawMovesPiece = new Point(2, 2),
                 Scale = new Vector2(2f, 2f)
             };
             rookBoard.Data.SetAt(2, 2, new PieceData()

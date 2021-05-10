@@ -23,14 +23,14 @@ namespace ShogiClient
             this.resources = resources;
         }
 
-        public (int X, int Y) GetIndexForCoordinate(Vector2 position)
+        public Point GetIndexForCoordinate(Vector2 position)
         {
             var topLeftPlayerHand = Position - Size / 2;
             var positionOnHand = position - topLeftPlayerHand;
             int x = (int)Math.Floor(positionOnHand.X / TileSize.X);
             int y = (int)Math.Floor(positionOnHand.Y / TileSize.Y);
 
-            return (x, y);
+            return new Point(x, y);
         }
 
         public void Draw(SpriteBatch spriteBatch)

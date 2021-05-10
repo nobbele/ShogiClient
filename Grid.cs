@@ -23,12 +23,15 @@ namespace ShogiClient
         }
 
         public T GetAt(int x, int y) => Data[y][x];
+        public T GetAt(Point point) => Data[point.Y][point.X];
         public void SetAt(int x, int y, T data) => Data[y][x] = data;
+        public void SetAt(Point point, T data) => Data[point.Y][point.X] = data;
 
         // Ignores checking if either is 0
         public bool AreIndicesWithinBounds(int x, int y) =>
             x >= 0 && x < Width
             && y >= 0 && y < Height;
+        public bool IsPointOnGrid(Point point) => AreIndicesWithinBounds(point.X, point.Y);
 
         public Grid<T> Clone()
         {
