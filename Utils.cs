@@ -391,12 +391,19 @@ namespace ShogiClient
         /// </returns>
         public static bool IsKingChecked(Grid<PieceData> board, bool isPlayerOne)
         {
-            var kingPiece = GetPlayerKing(board, isPlayerOne);
-            var opponentControl = OpponentControl(board, isPlayerOne);
-            var pieceThatCanTakeKing = opponentControl
-                .Where((pair) => pair.Value.Contains(kingPiece.Position))
-                .ToList();
-            return pieceThatCanTakeKing.Count > 0;
+            var possibleKingPiece = GetPlayerKing(board, isPlayerOne);
+            if (possibleKingPiece is (PieceData piece, Point position) kingPiece)
+            {
+                var opponentControl = OpponentControl(board, isPlayerOne);
+                var pieceThatCanTakeKing = opponentControl
+                    .Where((pair) => pair.Value.Contains(kingPiece.Position))
+                    .ToList();
+                return pieceThatCanTakeKing.Count > 0;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -454,7 +461,7 @@ namespace ShogiClient
         /// <returns>
         ///   A tuple containing the <see name="PieceData" /> and the X and Y positions of the king.
         /// </returns>
-        public static (PieceData Piece, Point Position) GetPlayerKing(Grid<PieceData> board, bool isPlayerOne)
+        public static (PieceData Piece, Point Position)? GetPlayerKing(Grid<PieceData> board, bool isPlayerOne)
         {
             for (int y = 0; y < board.Height; y++)
             {
@@ -469,7 +476,7 @@ namespace ShogiClient
                 }
             }
 
-            throw new Exception("No king");
+            return null;
         }
 
         /// <summary>
