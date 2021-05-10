@@ -95,18 +95,21 @@ namespace ShogiClient
                     var lastTurn = State.TurnList[State.TurnList.Count - 1];
                     turnTable.Data.SetAt((State.TurnList.Count - 1) % 2, (State.TurnList.Count - 1) / 2, null);
                     State.TurnList.RemoveAt(State.TurnList.Count - 1);
+
+                    var lastTurnPlayer = State.IsPlayerOneTurn ? State.PlayerTwo : State.PlayerOne;
+
                     if (lastTurn is MoveTurn moveTurn)
                     {
                         State.BoardState.Data.SetAt(moveTurn.XFrom, moveTurn.YFrom, moveTurn.Piece);
                         State.BoardState.Data.SetAt(moveTurn.XTarget, moveTurn.YTarget, moveTurn.Captured);
                         if (moveTurn.Captured != null) {
-                            var lastTurnPlayer = State.IsPlayerOneTurn ? State.PlayerTwo : State.PlayerOne;
                             lastTurnPlayer.Hand.Remove(moveTurn.Captured.Type);
                         }
                     }
                     else if (lastTurn is DropTurn dropTurn)
                     {
-
+                        State.BoardState.Data.SetAt(dropTurn.X, dropTurn.Y, null);
+                        lastTurnPlayer.Hand.Add(dropTurn.Type);
                     }
 
                     EndOfTurn();
