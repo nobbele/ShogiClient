@@ -78,7 +78,7 @@ namespace ShogiClient
             {
                 Position = new Vector2(Game.WindowSize.X * 4 / 5, Game.WindowSize.Y / 2),
                 Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 3),
-                Data = new Grid<string>(2, 5),
+                Data = new Grid<string>(2, 50),
                 EntryHeight = 15,
             };
 

@@ -53,7 +53,7 @@ namespace ShogiClient
                     spriteBatch.DrawString(
                         resources.PieceFont,
                         piecePrint,
-                        tilePosition - resources.PieceFont.MeasureString(piecePrint) / 2,
+                        tilePosition - resources.PieceFont.MeasureString(piecePrint) / 2 + resources.Tile.Bounds.Size.ToVector2() * Scale / 2,
                         Color.Black
                     );
                 }
