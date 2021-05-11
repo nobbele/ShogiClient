@@ -322,7 +322,7 @@ namespace ShogiClient
             // The two foreach's cannot be collapsed into ones, we need to check the whole board for columns first.
             foreach (var tile in board)
             {
-                if (tile.Content != null && tile.Content.IsPlayerOne == piece.IsPlayerOne && tile.Content.Type == PieceType.Pawn)
+                if (tile.Content != null && tile.Content.IsPlayerOne == piece.IsPlayerOne && tile.Content.Type == PieceType.Pawn && !tile.Content.Promoted)
                 {
                     pawnColumns[tile.Position.X] = true;
                 }
