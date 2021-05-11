@@ -1,6 +1,6 @@
 namespace ShogiClient
 {
-    public struct DropTurn : ITurn
+    public class DropTurn : ITurn
     {
         public PieceType Type { get; set; }
         public bool DidCheck { get; set; }

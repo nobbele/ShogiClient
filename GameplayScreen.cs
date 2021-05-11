@@ -102,6 +102,10 @@ namespace ShogiClient
 
                     if (lastTurn is MoveTurn moveTurn)
                     {
+                        if (moveTurn.DidPromote)
+                        {
+                            moveTurn.Piece.Promoted = false;
+                        }
                         State.BoardState.Data.SetAt(moveTurn.XFrom, moveTurn.YFrom, moveTurn.Piece);
                         State.BoardState.Data.SetAt(moveTurn.XTarget, moveTurn.YTarget, moveTurn.Captured);
                         if (moveTurn.Captured != null)

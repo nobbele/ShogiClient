@@ -2,7 +2,7 @@ using System;
 
 namespace ShogiClient
 {
-    public struct MoveTurn : ITurn
+    public class MoveTurn : ITurn
     {
         public PieceData Piece { get; set; }
         public bool DidPromote { get; set; }
