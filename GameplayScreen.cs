@@ -116,11 +116,6 @@ namespace ShogiClient
                     EndOfTurn();
                 }
             };
-
-            if (MediaPlayer.State == MediaState.Stopped)
-            {
-                MediaPlayer.Play(Resources.RandomGameplaySong);
-            }
         }
 
         public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
@@ -288,6 +283,11 @@ namespace ShogiClient
             if (board.State.HeldPiece != null)
             {
                 board.State.HeldPiecePosition = mousePosition;
+            }
+
+            if (MediaPlayer.State == MediaState.Stopped)
+            {
+                MediaPlayer.Play(Resources.RandomGameplaySong);
             }
 
             pauseButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
