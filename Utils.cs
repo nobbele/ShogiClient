@@ -348,6 +348,11 @@ namespace ShogiClient
                     }
                 }
 
+                if (Utils.WillMoveCauseCheck(piece, board, tile.Position, tile.Position))
+                {
+                    legalPosition = false;
+                }
+
                 if (legalPosition)
                 {
                     validMoves.Add(tile.Position);
