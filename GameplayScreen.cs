@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -81,6 +82,7 @@ namespace ShogiClient
                 TableWidth = 2,
                 EntryHeight = 15,
             };
+            turnTable.Data.AddRange(State.TurnList.Select(turn => turn.ToNotation()));
 
             takeBackButton = new UIButton(Resources)
             {
