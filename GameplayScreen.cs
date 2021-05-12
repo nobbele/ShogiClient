@@ -230,22 +230,41 @@ namespace ShogiClient
                 {
                     Resources.RandomPiecePlaceSFX.Play(0.5f, 0, 0);
 
+                    var placedPiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y);
+
                     bool didPromote = false;
+
+                    // Third last and third row respectively
+                    var firstPromotionRow = State.IsPlayerOneTurn ? 2 : board.State.Data.Height - 3;
+                    var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
+                    if (State.IsPlayerOneTurn)
+                    {
+                        indexToPromotionRow = -indexToPromotionRow;
+                    }
+
+                    if (placedPiece.Type == PieceType.Pawn || placedPiece.Type == PieceType.Lance)
+                    {
+                        if (boardIndex.Y == (State.IsPlayerOneTurn ? 0 : board.State.Data.Height - 1))
+                        {
+                            tryPromote = true;
+                        }
+                    }
+                    if (placedPiece.Type == PieceType.Knight)
+                    {
+                        if (indexToPromotionRow >= 1)
+                        {
+                            tryPromote = true;
+                        }
+                    }
+
                     if (tryPromote)
                     {
-                        // Third last and third row respectively
-                        var firstPromotionRow = State.IsPlayerOneTurn ? 2 : board.State.Data.Height - 3;
-                        var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
-                        if (State.IsPlayerOneTurn)
-                        {
-                            indexToPromotionRow = -indexToPromotionRow;
-                        }
                         if (indexToPromotionRow >= 0)
                         {
-                            var promotePiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y);
+                            var promotePiece = placedPiece;
                             if (Utils.CanPromotePieceType(promotePiece.Type))
                             {
-                                board.State.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
+                                placedPiece.Promoted = true;
                                 didPromote = true;
                             }
                         }
