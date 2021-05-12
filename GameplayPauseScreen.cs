@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
@@ -66,6 +67,8 @@ namespace ShogiClient
                 Position = new Vector2(Game.WindowSize.X / 2, 150),
                 Text = "Paused",
             };
+
+            MediaPlayer.Pause();
         }
 
         public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
@@ -75,6 +78,7 @@ namespace ShogiClient
                 var gameplayScreen = new GameplayScreen(Game);
                 gameplayScreen.State = gameplayState;
                 Game.SetCurrentScreen(gameplayScreen, false);
+                MediaPlayer.Resume();
                 return;
             }
 

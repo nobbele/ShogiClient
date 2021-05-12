@@ -9,6 +9,7 @@ namespace ShogiClient
     {
         private UIButton startGameButton;
         private UIButton exitGameButton;
+        private UIButton playPauseButton;
 
         public MainMenuScreen(Game1 game) : base(game)
         {
@@ -40,6 +41,20 @@ namespace ShogiClient
             {
                 Game.Exit();
             };
+
+            playPauseButton = new UIButton(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X * 4 / 5, 25),
+                Size = new Vector2(100, 50),
+                Text = "Play/Pause",
+            };
+            playPauseButton.OnClick += () =>
+            {
+                if (MediaPlayer.State == MediaState.Playing)
+                    MediaPlayer.Pause();
+                else if (MediaPlayer.State == MediaState.Paused)
+                    MediaPlayer.Resume();
+            };
         }
 
         public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
@@ -51,6 +66,7 @@ namespace ShogiClient
 
             startGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             exitGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            playPauseButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -62,6 +78,7 @@ namespace ShogiClient
 
             startGameButton.Draw(spriteBatch);
             exitGameButton.Draw(spriteBatch);
+            playPauseButton.Draw(spriteBatch);
         }
     }
 }
