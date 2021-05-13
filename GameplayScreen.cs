@@ -14,6 +14,7 @@ namespace ShogiClient
         private DrawableHand currentPlayerHand => State.IsPlayerOneTurn ? playerOneHand : playerTwoHand;
         private UIPanel CheckPanel;
         private UIButton pauseButton;
+        private UIButton optionsButton;
         private UIButton helpButton;
         private UITable turnTable;
         private UIButton takeBackButton;
@@ -62,6 +63,17 @@ namespace ShogiClient
             {
                 var currentGraphic = Game.Screenshot();
                 Game.SetCurrentScreen(new GameplayPauseScreen(Game, Resources, State, currentGraphic), false);
+            };
+            optionsButton = new UIButton(Resources)
+            {
+                Position = new Vector2(100, 110),
+                Size = new Vector2(100, 50),
+                Text = "Options"
+            };
+            optionsButton.OnClick += () =>
+            {
+                var currentGraphic = Game.Screenshot();
+                Game.SetCurrentScreen(new OptionsScreen<GameplayScreenState>(Game, Resources, State, currentGraphic), false);
             };
             helpButton = new UIButton(Resources)
             {
@@ -316,6 +328,7 @@ namespace ShogiClient
             }
 
             pauseButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            optionsButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             helpButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             takeBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
@@ -348,6 +361,7 @@ namespace ShogiClient
             }
 
             pauseButton.Draw(spriteBatch);
+            optionsButton.Draw(spriteBatch);
             helpButton.Draw(spriteBatch);
             takeBackButton.Draw(spriteBatch);
 
