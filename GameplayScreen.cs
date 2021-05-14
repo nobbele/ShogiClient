@@ -376,12 +376,12 @@ namespace ShogiClient
 {Utils.PieceTypeToKanji(PieceType.Gold, true, false)} - Gold
 {Utils.PieceTypeToKanji(PieceType.King, true, false)}/{Utils.PieceTypeToKanji(PieceType.King, false, false)} - King";
             spriteBatch.DrawString(Resources.PieceFont, tableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 2 / 6) - Resources.PieceFont.MeasureString(tableText) / 2, Color.White);
-            var promotedTableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, false)} - Pawn
-{Utils.PieceTypeToKanji(PieceType.Bishop, true, true)} - Bishop
-{Utils.PieceTypeToKanji(PieceType.Rook, true, true)} - Rook
-{Utils.PieceTypeToKanji(PieceType.Lance, true, true)} - Lance
-{Utils.PieceTypeToKanji(PieceType.Knight, true, true)} - Knight
-{Utils.PieceTypeToKanji(PieceType.Silver, true, true)} - Silver";
+            var promotedTableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, true)} - tokin (Promoted Pawn)
+{Utils.PieceTypeToKanji(PieceType.Bishop, true, true)} - Horse (Promoted Bishop)
+{Utils.PieceTypeToKanji(PieceType.Rook, true, true)} - Dragon (Promoted Rook)
+{Utils.PieceTypeToKanji(PieceType.Lance, true, true)} - Promoted Lance
+{Utils.PieceTypeToKanji(PieceType.Knight, true, true)} - Promoted Knight
+{Utils.PieceTypeToKanji(PieceType.Silver, true, true)} - Promoted Silver";
             spriteBatch.DrawString(Resources.PieceFont, promotedTableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 4 / 6) - Resources.PieceFont.MeasureString(promotedTableText) / 2, Color.Red);
             if (State.TurnList.Count > 0)
             {
