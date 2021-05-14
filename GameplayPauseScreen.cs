@@ -36,9 +36,7 @@ namespace ShogiClient
             };
             continueGameButton.OnClick += () =>
             {
-                var gameplayScreen = new GameplayScreen(Game);
-                gameplayScreen.State = gameplayState;
-                Game.SetCurrentScreen(gameplayScreen, false);
+                ReturnToGame();
             };
             restartGameButton = new UIButton(resources)
             {
@@ -71,14 +69,19 @@ namespace ShogiClient
             MediaPlayer.Pause();
         }
 
+        public void ReturnToGame()
+        {
+            var gameplayScreen = new GameplayScreen(Game);
+            gameplayScreen.State = gameplayState;
+            Game.SetCurrentScreen(gameplayScreen, false);
+            MediaPlayer.Resume();
+        }
+
         public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
         {
             if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
             {
-                var gameplayScreen = new GameplayScreen(Game);
-                gameplayScreen.State = gameplayState;
-                Game.SetCurrentScreen(gameplayScreen, false);
-                MediaPlayer.Resume();
+                ReturnToGame();
                 return;
             }
 

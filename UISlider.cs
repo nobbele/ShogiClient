@@ -54,7 +54,7 @@ namespace ShogiClient
                 CurrentValue = value;
             }
 
-            if (mouseState.LeftButton == ButtonState.Pressed)
+            if (mouseState.LeftButton == ButtonState.Pressed && RectOnScreen.Contains(mouseState.Position))
             {
                 if (prevMouseState.LeftButton == ButtonState.Released)
                 {
