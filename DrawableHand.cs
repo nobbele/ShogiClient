@@ -23,14 +23,14 @@ namespace ShogiClient
             this.resources = resources;
         }
 
-        public (int X, int Y) GetIndexForCoordinate(Vector2 position)
+        public Point GetIndexForCoordinate(Vector2 position)
         {
-            var topLeftPlayerHand = Position - Size / 2 - TileSize / 2;
+            var topLeftPlayerHand = Position - Size / 2;
             var positionOnHand = position - topLeftPlayerHand;
             int x = (int)Math.Floor(positionOnHand.X / TileSize.X);
             int y = (int)Math.Floor(positionOnHand.Y / TileSize.Y);
 
-            return (x, y);
+            return new Point(x, y);
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -39,7 +39,7 @@ namespace ShogiClient
             {
                 var tilePosition = Position - Size / 2 + GetTileOffsetFor(x);
 
-                spriteBatch.Draw(resources.Tile, tilePosition - resources.Tile.Bounds.Size.ToVector2() * Scale / 2, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+                spriteBatch.Draw(resources.Tile, tilePosition, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
                 if (PlayerData.Hand.Count > x)
                 {
                     PieceType type = PlayerData.Hand[x];
@@ -53,7 +53,7 @@ namespace ShogiClient
                     spriteBatch.DrawString(
                         resources.PieceFont,
                         piecePrint,
-                        tilePosition - resources.PieceFont.MeasureString(piecePrint) / 2,
+                        tilePosition - resources.PieceFont.MeasureString(piecePrint) / 2 + resources.Tile.Bounds.Size.ToVector2() * Scale / 2,
                         Color.Black
                     );
                 }

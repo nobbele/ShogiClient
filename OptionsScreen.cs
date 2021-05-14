@@ -1,21 +1,24 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
-    public class ResultScreen : Screen
+    public class OptionsScreen<TState> : Screen
+        where TState : ScreenState
     {
         // Have yet to implement a screen stack so this will have to do for now
-        private GameplayScreenState gameplayState;
+        private TState prevState;
         private Texture2D background;
 
         private UIPanel panel;
 
-        public ResultScreen(Game1 game, GameplayScreenState gameplayState, Texture2D background) : base(game)
+        public OptionsScreen(Game1 game, GameResources resources, TState prevState, Texture2D background) : base(game)
         {
-            this.gameplayState = gameplayState;
+            this.prevState = prevState;
             this.background = background;
+
             panel = new UIPanel(game)
             {
                 Position = new Vector2(100, 100),
@@ -27,7 +30,20 @@ namespace ShogiClient
         {
             if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
             {
-                Game.SetCurrentScreen(new MainMenuScreen(Game));
+                Screen screen = null;
+                if (prevState is GameplayScreenState gameplayState)
+                {
+                    var gameplayScreen = new GameplayScreen(Game);
+                    gameplayScreen.State = gameplayState;
+                    screen = gameplayScreen;
+                }
+                else if (prevState is MainMenuScreenState mainMenuState)
+                {
+                    var mainMenuScreen = new MainMenuScreen(Game);
+                    mainMenuScreen.State = mainMenuState;
+                    screen = mainMenuScreen;
+                }
+                Game.SetCurrentScreen(screen, false);
                 return;
             }
         }
@@ -36,10 +52,6 @@ namespace ShogiClient
         {
             spriteBatch.Draw(background, new Rectangle(Point.Zero, Game.WindowSize.ToPoint()), null, Color.White);
             panel.Draw(spriteBatch);
-
-            var winner = gameplayState.IsPlayerOneTurn ? "Player 2" : "Player 1";
-            var winnerText = $"{winner} Won after {gameplayState.TurnList.Count} turns!";
-            spriteBatch.DrawString(Resources.PieceFont, winnerText, Game.WindowSize / 2 - Resources.PieceFont.MeasureString(winnerText) / 2, Color.White);
         }
     }
 }

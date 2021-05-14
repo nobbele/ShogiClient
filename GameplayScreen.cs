@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,6 +13,11 @@ namespace ShogiClient
         private DrawableHand playerTwoHand;
         private DrawableHand currentPlayerHand => State.IsPlayerOneTurn ? playerOneHand : playerTwoHand;
         private UIPanel CheckPanel;
+        private UIButton pauseButton;
+        private UIButton optionsButton;
+        private UIButton helpButton;
+        private UITable turnTable;
+        private UIButton takeBackButton;
 
         public GameplayScreen(Game1 game) : base(game)
         {
@@ -22,7 +28,7 @@ namespace ShogiClient
         {
             base.Initialize(resources);
 
-            board = new DrawableBoard(resources, State.boardState)
+            board = new DrawableBoard(resources, State.BoardState)
             {
                 Position = Game.WindowSize / 2,
                 Scale = new Vector2(2f, 2f),
@@ -30,14 +36,14 @@ namespace ShogiClient
 
             playerOneHand = new DrawableHand(resources)
             {
-                PlayerData = State.playerOne,
+                PlayerData = State.PlayerOne,
                 Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y - 50),
                 Scale = new Vector2(1.5f)
             };
 
             playerTwoHand = new DrawableHand(resources)
             {
-                PlayerData = State.playerTwo,
+                PlayerData = State.PlayerTwo,
                 Position = new Vector2(Game.WindowSize.X / 2, 50),
                 Scale = new Vector2(1.5f)
             };
@@ -45,13 +51,89 @@ namespace ShogiClient
             {
                 Position = Vector2.Zero,
                 Size = Game.WindowSize,
-                Color = new Color(Color.DarkRed, 0.001f),
+                Color = new Color(Color.DarkRed, 0.0001f),
+            };
+            pauseButton = new UIButton(Resources)
+            {
+                Position = new Vector2(100, 50),
+                Size = new Vector2(100, 50),
+                Text = "Pause"
+            };
+            pauseButton.OnClick += () =>
+            {
+                var currentGraphic = Game.Screenshot();
+                Game.SetCurrentScreen(new GameplayPauseScreen(Game, Resources, State, currentGraphic), false);
+            };
+            optionsButton = new UIButton(Resources)
+            {
+                Position = new Vector2(100, 110),
+                Size = new Vector2(100, 50),
+                Text = "Options"
+            };
+            optionsButton.OnClick += () =>
+            {
+                var currentGraphic = Game.Screenshot();
+                Game.SetCurrentScreen(new OptionsScreen<GameplayScreenState>(Game, Resources, State, currentGraphic), false);
+            };
+            helpButton = new UIButton(Resources)
+            {
+                Position = new Vector2(Game.WindowSize.X - 100, 50),
+                Size = new Vector2(100, 50),
+                Text = "Help"
+            };
+            helpButton.OnClick += () =>
+            {
+                var currentGraphic = Game.Screenshot();
+                Game.SetCurrentScreen(new GameplayHelpScreen(Game, Resources, State, currentGraphic), false);
             };
 
-            if (MediaPlayer.State == MediaState.Stopped)
+            turnTable = new UITable(Game, Resources)
             {
-                MediaPlayer.Play(Resources.RandomGameplaySong);
-            }
+                Position = new Vector2(Game.WindowSize.X * 4 / 5, Game.WindowSize.Y / 2),
+                Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 3),
+                TableWidth = 2,
+                EntryHeight = 15,
+            };
+            turnTable.Data.AddRange(State.TurnList.Select(turn => turn.ToNotation()));
+
+            takeBackButton = new UIButton(Resources)
+            {
+                Position = new Vector2(Game.WindowSize.X - 100, Game.WindowSize.Y / 2),
+                Size = new Vector2(100, 50),
+                Text = "Take back",
+            };
+            takeBackButton.OnClick += () =>
+            {
+                if (State.TurnList.Count > 0)
+                {
+                    var lastTurn = State.TurnList[State.TurnList.Count - 1];
+                    turnTable.Data.RemoveAt(turnTable.Data.Count - 1);
+                    State.TurnList.RemoveAt(State.TurnList.Count - 1);
+
+                    var lastTurnPlayer = State.IsPlayerOneTurn ? State.PlayerTwo : State.PlayerOne;
+
+                    if (lastTurn is MoveTurn moveTurn)
+                    {
+                        if (moveTurn.DidPromote)
+                        {
+                            moveTurn.Piece.Promoted = false;
+                        }
+                        State.BoardState.Data.SetAt(moveTurn.XFrom, moveTurn.YFrom, moveTurn.Piece);
+                        State.BoardState.Data.SetAt(moveTurn.XTarget, moveTurn.YTarget, moveTurn.Captured);
+                        if (moveTurn.Captured != null)
+                        {
+                            lastTurnPlayer.Hand.Remove(moveTurn.Captured.Type);
+                        }
+                    }
+                    else if (lastTurn is DropTurn dropTurn)
+                    {
+                        State.BoardState.Data.SetAt(dropTurn.X, dropTurn.Y, null);
+                        lastTurnPlayer.Hand.Add(dropTurn.Type);
+                    }
+
+                    EndOfTurn();
+                }
+            };
         }
 
         public override void Update(GameTime gameTime, KeyboardState keyboardState, KeyboardState prevKeyboardState, MouseState mouseState, MouseState prevMouseState)
@@ -75,9 +157,9 @@ namespace ShogiClient
                     boardIndex.X >= 0 && boardIndex.X < board.State.Data.Width
                     && boardIndex.Y >= 0 && boardIndex.Y < board.State.Data.Height)
                 {
-                    if (board.State.PickUpPiece(boardIndex.X, boardIndex.Y, State.IsPlayerOneTurn))
+                    if (board.State.PickUpPiece(boardIndex, State.IsPlayerOneTurn))
                     {
-                        board.State.HeldPiecePickUpPosition = (boardIndex.X, boardIndex.Y);
+                        board.State.HeldPiecePickUpPosition = boardIndex;
                         failedToPick = false;
                     }
                 }
@@ -109,28 +191,25 @@ namespace ShogiClient
             var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed);
             var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && prevMouseState.RightButton == ButtonState.Pressed;
 
-            (PieceType type, bool promoted, int xFrom, int yFrom, int xTarget, int yTarget, PieceType? captured)? moveNotationData = null;
-            (PieceType type, int X, int Y)? dropNotationData = null;
-
             if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.State.HeldPiece != null)
             {
                 bool failedToPlace = false;
                 var tryPromote = false;
+                ITurn turnData = null;
 
                 if (board.State.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
                 {
-                    if (board.State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                    if (board.State.HeldPiecePickUpPosition is Point pickUpPosition)
                     {
-                        if (!board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, out PieceType? captured))
+                        if (!board.State.PlacePiece(pickUpPosition, boardIndex, out PieceData captured))
                         {
                             failedToPlace = true;
                         }
                         else
                         {
-                            // If there was a captured piece, not null
-                            if (captured is PieceType type)
+                            if (captured != null)
                             {
-                                State.CurrentPlayer.Hand.Add(type);
+                                State.CurrentPlayer.Hand.Add(captured.Type);
                             }
 
                             if (rightMouseButtonReleased)
@@ -138,19 +217,19 @@ namespace ShogiClient
                                 tryPromote = true;
                             }
 
-                            var piece = State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y);
-                            moveNotationData = (piece.Type, piece.Promoted, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
+                            var piece = State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y);
+                            turnData = new MoveTurn(piece, false, false, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
                         }
                     }
                     else
                     {
-                        if (!board.State.PlacePieceFromHand(boardIndex.X, boardIndex.Y))
+                        if (!board.State.PlacePieceFromHand(boardIndex))
                         {
                             failedToPlace = true;
                         }
                         else
                         {
-                            dropNotationData = (State.boardState.Data.GetAt(boardIndex.X, boardIndex.Y).Type, boardIndex.X, boardIndex.Y);
+                            turnData = new DropTurn(State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y).Type, boardIndex.X, boardIndex.Y, false);
                         }
                     }
                 }
@@ -163,56 +242,61 @@ namespace ShogiClient
                 {
                     Resources.RandomPiecePlaceSFX.Play(0.5f, 0, 0);
 
-                    var didPromote = false;
+                    var placedPiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y);
+
+                    bool didPromote = false;
+
+                    // Third last and third row respectively
+                    var firstPromotionRow = State.IsPlayerOneTurn ? 2 : board.State.Data.Height - 3;
+                    var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
+                    if (State.IsPlayerOneTurn)
+                    {
+                        indexToPromotionRow = -indexToPromotionRow;
+                    }
+
+                    if (placedPiece.Type == PieceType.Pawn || placedPiece.Type == PieceType.Lance)
+                    {
+                        if (boardIndex.Y == (State.IsPlayerOneTurn ? 0 : board.State.Data.Height - 1))
+                        {
+                            tryPromote = true;
+                        }
+                    }
+                    if (placedPiece.Type == PieceType.Knight)
+                    {
+                        if (indexToPromotionRow >= 1)
+                        {
+                            tryPromote = true;
+                        }
+                    }
+
                     if (tryPromote)
                     {
-                        // Third last and third row respectively
-                        var firstPromotionRow = State.IsPlayerOneTurn ? 2 : board.State.Data.Height - 3;
-                        var indexToPromotionRow = boardIndex.Y - firstPromotionRow;
-                        if (State.IsPlayerOneTurn)
-                        {
-                            indexToPromotionRow = -indexToPromotionRow;
-                        }
                         if (indexToPromotionRow >= 0)
                         {
-                            var promotePiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y);
+                            var promotePiece = placedPiece;
                             if (Utils.CanPromotePieceType(promotePiece.Type))
                             {
-                                board.State.Data.GetAt(boardIndex.X, boardIndex.Y).Promoted = true;
+                                placedPiece.Promoted = true;
                                 didPromote = true;
                             }
                         }
                     }
 
-                    State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
+                    EndOfTurn();
 
-                    State.isCheck = false;
-
-                    bool isCheckMate = false;
-                    if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
+                    if (turnData != null)
                     {
-                        State.isCheck = true;
-                        if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
+                        turnData.DidCheck = State.IsCheck;
+                        if (turnData is MoveTurn moveData)
                         {
-                            isCheckMate = true;
+                            moveData.DidPromote = didPromote;
                         }
+                        System.Console.WriteLine(turnData.ToNotation());
+                        turnTable.Data.Add(turnData.ToNotation());
+                        State.TurnList.Add(turnData);
                     }
 
-                    string notationText = null;
-                    if (moveNotationData != null)
-                    {
-                        var data = moveNotationData.Value;
-                        notationText = Utils.MoveNotation(data.type, data.promoted, data.xFrom, data.yFrom, data.xTarget, data.yTarget, data.captured, didPromote, State.isCheck);
-                    }
-                    else if (dropNotationData != null)
-                    {
-                        var data = dropNotationData.Value;
-                        notationText = Utils.DropNotation(data.type, data.X, data.Y);
-                    }
-
-                    System.Console.WriteLine(notationText);
-
-                    if (isCheckMate)
+                    if (State.IsCheckMate)
                     {
                         var currentGraphic = Game.Screenshot();
                         Game.SetCurrentScreen(new ResultScreen(Game, State, currentGraphic), false);
@@ -221,9 +305,9 @@ namespace ShogiClient
                 }
                 else
                 {
-                    if (board.State.HeldPiecePickUpPosition is (int, int) pickUpPosition)
+                    if (board.State.HeldPiecePickUpPosition is Point pickUpPosition)
                     {
-                        board.State.PlacePiece(pickUpPosition.X, pickUpPosition.Y);
+                        board.State.PlacePiece(pickUpPosition);
                     }
                     else
                     {
@@ -237,6 +321,32 @@ namespace ShogiClient
             {
                 board.State.HeldPiecePosition = mousePosition;
             }
+
+            if (MediaPlayer.State == MediaState.Stopped)
+            {
+                MediaPlayer.Play(Resources.RandomGameplaySong);
+            }
+
+            pauseButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            optionsButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            helpButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            takeBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+        }
+
+        public void EndOfTurn()
+        {
+            State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
+
+            State.IsCheck = false;
+            State.IsCheckMate = false;
+            if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
+            {
+                State.IsCheck = true;
+                if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
+                {
+                    State.IsCheckMate = true;
+                }
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -245,9 +355,38 @@ namespace ShogiClient
             board.Draw(spriteBatch);
             playerOneHand.Draw(spriteBatch);
             playerTwoHand.Draw(spriteBatch);
-            if (State.isCheck)
+            if (State.IsCheck)
             {
                 CheckPanel.Draw(spriteBatch);
+            }
+
+            pauseButton.Draw(spriteBatch);
+            optionsButton.Draw(spriteBatch);
+            helpButton.Draw(spriteBatch);
+            takeBackButton.Draw(spriteBatch);
+
+            turnTable.Draw(spriteBatch);
+
+            var tableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, false)} - Pawn
+{Utils.PieceTypeToKanji(PieceType.Bishop, true, false)} - Bishop
+{Utils.PieceTypeToKanji(PieceType.Rook, true, false)} - Rook
+{Utils.PieceTypeToKanji(PieceType.Lance, true, false)} - Lance
+{Utils.PieceTypeToKanji(PieceType.Knight, true, false)} - Knight
+{Utils.PieceTypeToKanji(PieceType.Silver, true, false)} - Silver
+{Utils.PieceTypeToKanji(PieceType.Gold, true, false)} - Gold
+{Utils.PieceTypeToKanji(PieceType.King, true, false)}/{Utils.PieceTypeToKanji(PieceType.King, false, false)} - King";
+            spriteBatch.DrawString(Resources.PieceFont, tableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 2 / 6) - Resources.PieceFont.MeasureString(tableText) / 2, Color.White);
+            var promotedTableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, false)} - Pawn
+{Utils.PieceTypeToKanji(PieceType.Bishop, true, true)} - Bishop
+{Utils.PieceTypeToKanji(PieceType.Rook, true, true)} - Rook
+{Utils.PieceTypeToKanji(PieceType.Lance, true, true)} - Lance
+{Utils.PieceTypeToKanji(PieceType.Knight, true, true)} - Knight
+{Utils.PieceTypeToKanji(PieceType.Silver, true, true)} - Silver";
+            spriteBatch.DrawString(Resources.PieceFont, promotedTableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 4 / 6) - Resources.PieceFont.MeasureString(promotedTableText) / 2, Color.Red);
+            if (State.TurnList.Count > 0)
+            {
+                var lastMoveText = State.TurnList[State.TurnList.Count - 1].ToNotation();
+                spriteBatch.DrawString(Resources.PieceFont, lastMoveText, new Vector2(Game.WindowSize.X / 12, Game.WindowSize.Y / 2) - Resources.PieceFont.MeasureString(lastMoveText) / 2, Color.Black);
             }
         }
     }

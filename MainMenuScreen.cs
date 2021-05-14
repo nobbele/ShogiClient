@@ -5,10 +5,12 @@ using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
-    public class MainMenuScreen : Screen
+    public class MainMenuScreen : StatefulScreen<MainMenuScreenState>
     {
         private UIButton startGameButton;
+        private UIButton optionsButton;
         private UIButton exitGameButton;
+        private UIButton playPauseButton;
 
         public MainMenuScreen(Game1 game) : base(game)
         {
@@ -30,15 +32,40 @@ namespace ShogiClient
                 Game.SetCurrentScreen(new GameplayScreen(Game));
             };
 
-            exitGameButton = new UIButton(resources)
+            optionsButton = new UIButton(resources)
             {
                 Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y * 3 / 5),
+                Size = new Vector2(200, 100),
+                Text = "Options",
+            };
+            optionsButton.OnClick += () =>
+            {
+                Game.SetCurrentScreen(new OptionsScreen<MainMenuScreenState>(Game, Resources, State, Game.Screenshot()), false);
+            };
+
+            exitGameButton = new UIButton(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y * 4 / 5),
                 Size = new Vector2(200, 100),
                 Text = "Quit",
             };
             exitGameButton.OnClick += () =>
             {
                 Game.Exit();
+            };
+
+            playPauseButton = new UIButton(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X * 4 / 5, 25),
+                Size = new Vector2(100, 50),
+                Text = "Play/Pause",
+            };
+            playPauseButton.OnClick += () =>
+            {
+                if (MediaPlayer.State == MediaState.Playing)
+                    MediaPlayer.Pause();
+                else if (MediaPlayer.State == MediaState.Paused)
+                    MediaPlayer.Resume();
             };
         }
 
@@ -50,7 +77,9 @@ namespace ShogiClient
             }
 
             startGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            optionsButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             exitGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            playPauseButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -61,7 +90,9 @@ namespace ShogiClient
             spriteBatch.Draw(Resources.Logo, logoPosition - Resources.Logo.Bounds.Size.ToVector2(), null, Color.White, 0, Vector2.Zero, 2, SpriteEffects.None, 0);
 
             startGameButton.Draw(spriteBatch);
+            optionsButton.Draw(spriteBatch);
             exitGameButton.Draw(spriteBatch);
+            playPauseButton.Draw(spriteBatch);
         }
     }
 }

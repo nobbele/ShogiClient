@@ -9,17 +9,17 @@ namespace ShogiClient
 
         public Vector2 HeldPiecePosition { get; set; } = new Vector2(0, 0);
         // If null, that means it's taken from the hand
-        public (int X, int Y)? HeldPiecePickUpPosition { get; set; } = null;
+        public Point? HeldPiecePickUpPosition { get; set; } = null;
 
         /// <summary>
         ///   Removes a piece from the board and puts it in the HeldPiece property.
         /// </summary>
-        public bool PickUpPiece(int x, int y, bool isPlayerOne)
+        public bool PickUpPiece(Point point, bool isPlayerOne)
         {
-            var piece = Data.GetAt(x, y);
+            var piece = Data.GetAt(point);
             if (piece == null || piece.IsPlayerOne != isPlayerOne)
                 return false;
-            Data.SetAt(x, y, null);
+            Data.SetAt(point, null);
             HeldPiece = piece;
             return true;
         }
@@ -27,43 +27,43 @@ namespace ShogiClient
         /// <summary>
         ///   Removes a piece from the HeldPiece property and puts it on the board.
         /// </summary>
-        public bool PlacePiece(int fromX, int fromY, int targetX, int targetY, out PieceType? captured)
+        public bool PlacePiece(Point from, Point target, out PieceData captured)
         {
             captured = null;
 
-            if (!Utils.ValidMovesForPiece(HeldPiece, Data, fromX, fromY).Contains((targetX, targetY)))
+            if (!Utils.ValidMovesForPiece(HeldPiece, Data, from).Contains(target))
             {
                 return false;
             }
 
-            var piece = Data.GetAt(targetX, targetY);
+            var piece = Data.GetAt(target);
             if (piece != null)
             {
-                captured = piece.Type;
+                captured = piece;
             }
-            PlacePiece(targetX, targetY);
+            PlacePiece(target);
             return true;
         }
 
         /// <summary>
         ///   Removes a piece from the hand and puts it on the board.
         /// </summary>
-        public bool PlacePieceFromHand(int targetX, int targetY)
+        public bool PlacePieceFromHand(Point target)
         {
-            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data).Contains((targetX, targetY)))
+            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data).Contains(target))
             {
                 return false;
             }
 
-            var piece = Data.GetAt(targetX, targetY);
-            PlacePiece(targetX, targetY);
+            var piece = Data.GetAt(target);
+            PlacePiece(target);
             return true;
         }
 
 
-        public void PlacePiece(int x, int y)
+        public void PlacePiece(Point point)
         {
-            Data.SetAt(x, y, HeldPiece);
+            Data.SetAt(point, HeldPiece);
             HeldPiece = null;
         }
 
@@ -72,6 +72,7 @@ namespace ShogiClient
             Data = new Grid<PieceData>(width, height);
             // The variable is ordered from bottom-up but arrays are accessed from top-to-bottom so it needs to be read in reverse
             // it makes more sense to this for readability purposes
+
             var setup = new string[] {
                 "ppppppppp",
                 " b     r ",
@@ -80,7 +81,7 @@ namespace ShogiClient
 
             for (int y = 0; y < setup.Length; y++)
             {
-                for (int x = 0; x < Data.Width; x++)
+                for (int x = 0; x < setup[0].Length; x++)
                 {
                     // Read in reverse, bottom up
                     var c = setup[setup.Length - y - 1][x];
@@ -90,13 +91,13 @@ namespace ShogiClient
                         Data.SetAt(Data.Width - x - 1, y, new PieceData()
                         {
                             Type = type.type,
-                            Promoted = type.promoted,
+                            Promoted = type.promoted && Utils.CanPromotePieceType(type.type),
                             IsPlayerOne = false,
                         });
                         Data.SetAt(x, Data.Height - y - 1, new PieceData()
                         {
                             Type = type.type,
-                            Promoted = type.promoted,
+                            Promoted = type.promoted && Utils.CanPromotePieceType(type.type),
                             IsPlayerOne = true,
                         });
                     }

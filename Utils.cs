@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 
 namespace ShogiClient
 {
@@ -62,32 +63,6 @@ namespace ShogiClient
             else
                 return char.ToLower(character);
         }
-
-        // TODO Documentation
-        public static string MoveNotation(PieceType type, bool promoted, int xFrom, int yFrom, int xTarget, int yTarget, PieceType? captured, bool didPromote, bool causedCheck)
-            => $@"
-                {PieceTypeToNotationChar(type, promoted)}
-                {(char)('A' + xFrom)}
-                {yFrom}
-                x
-                {(char)('A' + xTarget)}
-                {yTarget}
-                {(captured != null
-                    ? $"*{PieceTypeToNotationChar(type, false)}"
-                    : string.Empty
-                )}
-                {(didPromote
-                    ? "+"
-                    : string.Empty
-                )}
-                {(causedCheck
-                    ? "#"
-                    : string.Empty
-                )}
-            ".Replace(Environment.NewLine, string.Empty).Replace(" ", string.Empty).Replace("\t", string.Empty);
-
-        public static string DropNotation(PieceType type, int xTarget, int yTarget)
-            => $"V{PieceTypeToNotationChar(type, false)}{(char)('A' + xTarget)}{yTarget}";
 
         /// <summary>
         ///   Converts <paramref name="type"/> to the corresponding Kanji used to identify the piece.
@@ -220,18 +195,22 @@ namespace ShogiClient
         ///   A dictionary where the key is a specific location of the opponent piece
         ///   and the value is a list of positions that the piece in the key can move to, the tiles it has control over.
         /// </returns>
-        public static Dictionary<(int X, int Y), List<(int X, int Y)>> OpponentControl(Grid<PieceData> board, bool isPlayerOne)
+        public static Dictionary<Point, List<Point>> OpponentControl(Grid<PieceData> board, bool isPlayerOne)
         {
-            var opponentControl = new Dictionary<(int X, int Y), List<(int X, int Y)>>();
+            var opponentControl = new Dictionary<Point, List<Point>>();
+            foreach (var piece in board)
+            {
+                if (piece.Content != null && piece.Content.IsPlayerOne != isPlayerOne)
+                {
+                    opponentControl.Add(piece.Position, ValidMovesForPiece(piece.Content, board, piece.Position, false));
+                }
+            }
             for (int y = 0; y < board.Height; y++)
             {
                 for (int x = 0; x < board.Width; x++)
                 {
                     var pieceOnBoard = board.GetAt(x, y);
-                    if (pieceOnBoard != null && pieceOnBoard.IsPlayerOne != isPlayerOne)
-                    {
-                        opponentControl.Add((x, y), ValidMovesForPiece(pieceOnBoard, board, x, y, false));
-                    }
+
                 }
             }
 
@@ -249,22 +228,21 @@ namespace ShogiClient
         /// <returns>
         ///   A list of positions that the piece in the piece specified can move to.
         /// </returns>
-        public static List<(int X, int Y)> ValidMovesForPiece(
+        public static List<Point> ValidMovesForPiece(
             PieceData piece,
             Grid<PieceData> board,
-            int currentX,
-            int currentY,
+            Point currentPosition,
             bool checkForCheck = true)
         {
             var moveSet = Utils.PieceTypeMoveSet(piece.Type, piece.Promoted);
             // Center of the move set, aka the position where the piece is located.
-            (int X, int Y) center = (-1, -1);
+            var center = new Point(-1, -1);
             for (int y = 0; y < moveSet.Length; y++)
             {
                 int x = moveSet[y].IndexOf('.');
                 if (x != -1)
                 {
-                    center = (x, y);
+                    center = new Point(x, y);
                     break;
                 }
             }
@@ -274,7 +252,7 @@ namespace ShogiClient
                 throw new System.Exception("Invalid center");
             }
 
-            var validMoves = new List<(int X, int Y)>();
+            var validMoves = new List<Point>();
             for (int y = 0; y < moveSet.Length; y++)
             {
                 for (int x = 0; x < moveSet[y].Length; x++)
@@ -283,11 +261,8 @@ namespace ShogiClient
                     if (c != ' ')
                     {
                         // Offset from the center.
-                        var moveSetPositionOffset = SidedOffsetToGlobalOffset(center.X, center.Y, x, y, piece.IsPlayerOne);
-                        (int X, int Y) positionOnBoard = (
-                            currentX + moveSetPositionOffset.X,
-                            currentY + moveSetPositionOffset.Y
-                        );
+                        var moveSetPositionOffset = SidedOffsetToGlobalOffset(center, new Point(x, y), piece.IsPlayerOne);
+                        var positionOnBoard = currentPosition + moveSetPositionOffset;
 
                         if (board.AreIndicesWithinBounds(positionOnBoard.X, positionOnBoard.Y))
                         {
@@ -300,7 +275,7 @@ namespace ShogiClient
                                 if (!occupiedTile)
                                 {
                                     // If checkForCheck is true, it will check so the move doesn't cause a check for the player.
-                                    if (!checkForCheck || !WillMoveCauseCheck(piece, board, currentX, currentY, positionOnBoard.X, positionOnBoard.Y))
+                                    if (!checkForCheck || !WillMoveCauseCheck(piece, board, currentPosition, positionOnBoard))
                                     {
                                         validMoves.Add(positionOnBoard);
                                     }
@@ -309,14 +284,14 @@ namespace ShogiClient
                             else if (c == 'M')
                             {
                                 var moves = RayCastPathForMovement(
-                                    currentX, currentY,
-                                    moveSetPositionOffset.X, moveSetPositionOffset.Y,
+                                    currentPosition,
+                                    moveSetPositionOffset,
                                     piece.IsPlayerOne,
                                     board
                                 );
                                 if (checkForCheck)
                                 {
-                                    moves = moves.Where(move => !WillMoveCauseCheck(piece, board, currentX, currentY, move.X, move.Y)).ToList();
+                                    moves = moves.Where(move => !WillMoveCauseCheck(piece, board, currentPosition, move)).ToList();
                                 }
                                 validMoves.AddRange(moves);
                             }
@@ -336,20 +311,20 @@ namespace ShogiClient
         /// <returns>
         ///   A list of positions that the piece in the piece specified can be dropped to.
         /// </returns>
-        public static List<(int X, int Y)> ValidPositionsForPieceDrop(
+        public static List<Point> ValidPositionsForPieceDrop(
             PieceData piece,
             Grid<PieceData> board)
         {
-            var validMoves = new List<(int X, int Y)>();
+            var validMoves = new List<Point>();
 
             // To check two pawn drop, no need to run it on non-pawn pieces but this is easier.
             var pawnColumns = new bool[board.Width];
             // The two foreach's cannot be collapsed into ones, we need to check the whole board for columns first.
             foreach (var tile in board)
             {
-                if (tile.Content != null && tile.Content.IsPlayerOne == piece.IsPlayerOne && tile.Content.Type == PieceType.Pawn)
+                if (tile.Content != null && tile.Content.IsPlayerOne == piece.IsPlayerOne && tile.Content.Type == PieceType.Pawn && !tile.Content.Promoted)
                 {
-                    pawnColumns[tile.X] = true;
+                    pawnColumns[tile.Position.X] = true;
                 }
             }
 
@@ -367,15 +342,20 @@ namespace ShogiClient
                 {
                     // Two pawn drop: You can't drop a pawn in a column where you already have a pawn.
                     // Mate pawn drop: You can't drop a pawn on a tile that will instantly cause a check for the opponent king.
-                    if (pawnColumns[tile.X] || Utils.WillMoveCauseCheckFor(piece, board, tile.X, tile.Y, tile.X, tile.Y, !piece.IsPlayerOne))
+                    if (pawnColumns[tile.Position.X] || Utils.WillMoveCauseCheckFor(piece, board, tile.Position, tile.Position, !piece.IsPlayerOne))
                     {
                         legalPosition = false;
                     }
                 }
 
+                if (Utils.WillMoveCauseCheck(piece, board, tile.Position, tile.Position))
+                {
+                    legalPosition = false;
+                }
+
                 if (legalPosition)
                 {
-                    validMoves.Add((tile.X, tile.Y));
+                    validMoves.Add(tile.Position);
                 }
             }
 
@@ -396,7 +376,7 @@ namespace ShogiClient
             {
                 if (tile.Content != null && tile.Content.IsPlayerOne == isPlayerOne)
                 {
-                    if (ValidMovesForPiece(tile.Content, board, tile.X, tile.Y).Count > 0)
+                    if (ValidMovesForPiece(tile.Content, board, tile.Position).Count > 0)
                     {
                         return false;
                     }
@@ -416,13 +396,19 @@ namespace ShogiClient
         /// </returns>
         public static bool IsKingChecked(Grid<PieceData> board, bool isPlayerOne)
         {
-            var kingPiece = GetPlayerKing(board, isPlayerOne);
-
-            var opponentControl = OpponentControl(board, isPlayerOne);
-            var pieceThatCanTakeKing = opponentControl
-                .Where((pair) => pair.Value.Contains((kingPiece.X, kingPiece.Y)))
-                .ToList();
-            return pieceThatCanTakeKing.Count > 0;
+            var possibleKingPiece = GetPlayerKing(board, isPlayerOne);
+            if (possibleKingPiece is (PieceData piece, Point position) kingPiece)
+            {
+                var opponentControl = OpponentControl(board, isPlayerOne);
+                var pieceThatCanTakeKing = opponentControl
+                    .Where((pair) => pair.Value.Contains(kingPiece.Position))
+                    .ToList();
+                return pieceThatCanTakeKing.Count > 0;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -440,11 +426,9 @@ namespace ShogiClient
         public static bool WillMoveCauseCheck(
             PieceData piece,
             Grid<PieceData> board,
-            int currentX,
-            int currentY,
-            int targetX,
-            int targetY)
-            => WillMoveCauseCheckFor(piece, board, currentX, currentY, targetX, targetY, piece.IsPlayerOne);
+            Point current,
+            Point target)
+            => WillMoveCauseCheckFor(piece, board, current, target, piece.IsPlayerOne);
 
         /// <summary>
         ///   Checks if the specified move will cause a check to the player's king who's piece is being moved.
@@ -462,16 +446,14 @@ namespace ShogiClient
         public static bool WillMoveCauseCheckFor(
             PieceData piece,
             Grid<PieceData> board,
-            int currentX,
-            int currentY,
-            int targetX,
-            int targetY,
+            Point current,
+            Point target,
             bool isPlayerOne)
         {
             var tempBoard = board.Clone();
 
-            tempBoard.SetAt(currentX, currentY, null);
-            tempBoard.SetAt(targetX, targetY, piece);
+            tempBoard.SetAt(current.X, current.Y, null);
+            tempBoard.SetAt(target.X, target.Y, piece);
 
             return IsKingChecked(tempBoard, isPlayerOne);
         }
@@ -484,7 +466,7 @@ namespace ShogiClient
         /// <returns>
         ///   A tuple containing the <see name="PieceData" /> and the X and Y positions of the king.
         /// </returns>
-        public static (PieceData piece, int X, int Y) GetPlayerKing(Grid<PieceData> board, bool isPlayerOne)
+        public static (PieceData Piece, Point Position)? GetPlayerKing(Grid<PieceData> board, bool isPlayerOne)
         {
             for (int y = 0; y < board.Height; y++)
             {
@@ -494,27 +476,27 @@ namespace ShogiClient
                     // If there's a piece at x,y on the board, and if that piece is the players, and if that piece is a king.
                     if (pieceOnBoard != null && pieceOnBoard.IsPlayerOne == isPlayerOne && pieceOnBoard.Type == PieceType.King)
                     {
-                        return (pieceOnBoard, x, y);
+                        return (pieceOnBoard, new Point(x, y));
                     }
                 }
             }
 
-            return (null, -1, -1);
+            return null;
         }
 
         /// <summary>
         ///   Used to calculate what offset from the center a specific target and center coordinate is for the specified player.
         ///   Move sets are flipped for the player 2.
         /// </summary>
-        private static (int X, int Y) SidedOffsetToGlobalOffset(int centerX, int centerY, int x, int y, bool isPlayerOne)
+        private static Point SidedOffsetToGlobalOffset(Point center, Point local, bool isPlayerOne)
         {
             if (isPlayerOne)
             {
-                return (-(centerX - x), -(centerY - y));
+                return Point.Zero - (center - local);
             }
             else
             {
-                return (centerX - x, centerY - y);
+                return (center - local);
             }
         }
 
@@ -524,37 +506,36 @@ namespace ShogiClient
         ///   If it hit one of the player specified in <paramref name="isPlayerOne"/>'s pieces, it stops before that.
         ///   If it hits one of the opponent pieces, it will be allowed to hit the first opponent piece but no more.
         /// </summary>
-        private static List<(int X, int Y)> RayCastPathForMovement(
-            int currentX, int currentY,
-            int directionX, int directionY,
+        private static List<Point> RayCastPathForMovement(
+            Point current,
+            Point direction,
             bool isPlayerOne,
             Grid<PieceData> board)
         {
-            var validMoves = new List<(int X, int Y)>();
+            var validMoves = new List<Point>();
             // The ratio for which the y values with be incremented in relation to x, aka the slope
             // Can't divide by 0 so we must handle special case directionX,
             // but it won't be used anyway in the case directionX is zero so we can set whatever value.
-            var yRatio = Math.Abs(directionX == 0 ? 0 : directionY / directionX);
-            var xSign = Math.Sign(directionX);
-            var ySign = Math.Sign(directionY);
+            var yRatio = Math.Abs(direction.X == 0 ? 0 : direction.Y / direction.X);
+            var xSign = Math.Sign(direction.X);
+            var ySign = Math.Sign(direction.Y);
 
             PieceData prevRayPoint = null;
             // Step by the x direction
-            for (int step = Math.Abs(directionX); true; step++)
+            for (int step = Math.Abs(direction.X); true; step++)
             {
                 // If there is no x direction, there will be no ratio and so just set the y direction equal to the step.
-                var y = directionX == 0 ? step + 1 : step * yRatio;
+                var y = direction.X == 0 ? step + 1 : step * yRatio;
 
-                var targetX = currentX + step * xSign;
-                var targetY = currentY + y * ySign;
+                var target = current + new Point(step * xSign, y * ySign);
 
                 // If the ray stepped outside the bounds of the board, we stop the stepping.
-                if (!board.AreIndicesWithinBounds(targetX, targetY))
+                if (!board.AreIndicesWithinBounds(target.X, target.Y))
                 {
                     break;
                 }
 
-                var pieceAtRayPoint = board.GetAt(targetX, targetY);
+                var pieceAtRayPoint = board.GetAt(target.X, target.Y);
 
                 // If there is a piece at the raypoint and it's the current player's piece, we stop stepping
                 // If there was a piece at the previous step of the ray, we stop stepping.
@@ -565,7 +546,7 @@ namespace ShogiClient
                     break;
                 }
 
-                validMoves.Add((targetX, targetY));
+                validMoves.Add(new Point(target.X, target.Y));
                 prevRayPoint = pieceAtRayPoint;
             }
 
