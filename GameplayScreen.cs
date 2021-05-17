@@ -317,6 +317,15 @@ namespace ShogiClient
                 }
             }
 
+            if (State.CurrentPlayer.TimeLeft <= 0) 
+            {
+                // TODO Lose by running out of time
+            } 
+            else 
+            {
+                State.CurrentPlayer.TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+
             if (board.State.HeldPiece != null)
             {
                 board.State.HeldPiecePosition = mousePosition;
@@ -388,6 +397,10 @@ namespace ShogiClient
                 var lastMoveText = State.TurnList[State.TurnList.Count - 1].ToNotation();
                 spriteBatch.DrawString(Resources.PieceFont, lastMoveText, new Vector2(Game.WindowSize.X / 12, Game.WindowSize.Y / 2) - Resources.PieceFont.MeasureString(lastMoveText) / 2, Color.Black);
             }
+            var playerOneTimerText = $"{(int)(State.PlayerOne.TimeLeft / 60):00}:{(int)(State.PlayerOne.TimeLeft % 60):00}";
+            spriteBatch.DrawString(Resources.PieceFont, playerOneTimerText, new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y - 95) - Resources.PieceFont.MeasureString(playerOneTimerText) / 2, Color.Black);
+            var playerTwoTimerText = $"{(int)(State.PlayerTwo.TimeLeft / 60):00}:{(int)(State.PlayerTwo.TimeLeft % 60):00}";
+            spriteBatch.DrawString(Resources.PieceFont, playerTwoTimerText, new Vector2(Game.WindowSize.X / 2, 95)  - Resources.PieceFont.MeasureString(playerTwoTimerText) / 2, Color.Black);
         }
     }
 }
