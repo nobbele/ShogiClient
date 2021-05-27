@@ -90,7 +90,7 @@ namespace ShogiClient
             turnTable = new UITable(Game, Resources)
             {
                 Position = new Vector2(Game.WindowSize.X * 4 / 5, Game.WindowSize.Y / 2),
-                Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 30),
+                Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 3),
                 TableWidth = 2,
                 EntryHeight = 15,
             };
