@@ -321,7 +321,7 @@ namespace ShogiClient
             {
                 // TODO Lose by running out of time
             }
-            else
+            else if (State.clockRunning)
             {
                 State.CurrentPlayer.TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
@@ -357,6 +357,8 @@ namespace ShogiClient
                     State.IsCheckMate = true;
                 }
             }
+
+            State.clockRunning = true;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
