@@ -90,7 +90,7 @@ namespace ShogiClient
             turnTable = new UITable(Game, Resources)
             {
                 Position = new Vector2(Game.WindowSize.X * 4 / 5, Game.WindowSize.Y / 2),
-                Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 3),
+                Size = new Vector2(Game.WindowSize.X / 5 - 100, Game.WindowSize.Y * 2 / 30),
                 TableWidth = 2,
                 EntryHeight = 15,
             };
@@ -317,11 +317,11 @@ namespace ShogiClient
                 }
             }
 
-            if (State.CurrentPlayer.TimeLeft <= 0) 
+            if (State.CurrentPlayer.TimeLeft <= 0)
             {
                 // TODO Lose by running out of time
-            } 
-            else 
+            }
+            else
             {
                 State.CurrentPlayer.TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
@@ -340,6 +340,7 @@ namespace ShogiClient
             optionsButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             helpButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             takeBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            turnTable.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
         public void EndOfTurn()
@@ -400,7 +401,7 @@ namespace ShogiClient
             var playerOneTimerText = $"{(int)(State.PlayerOne.TimeLeft / 60):00}:{(int)(State.PlayerOne.TimeLeft % 60):00}";
             spriteBatch.DrawString(Resources.PieceFont, playerOneTimerText, new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y - 95) - Resources.PieceFont.MeasureString(playerOneTimerText) / 2, Color.Black);
             var playerTwoTimerText = $"{(int)(State.PlayerTwo.TimeLeft / 60):00}:{(int)(State.PlayerTwo.TimeLeft % 60):00}";
-            spriteBatch.DrawString(Resources.PieceFont, playerTwoTimerText, new Vector2(Game.WindowSize.X / 2, 95)  - Resources.PieceFont.MeasureString(playerTwoTimerText) / 2, Color.Black);
+            spriteBatch.DrawString(Resources.PieceFont, playerTwoTimerText, new Vector2(Game.WindowSize.X / 2, 95) - Resources.PieceFont.MeasureString(playerTwoTimerText) / 2, Color.Black);
         }
     }
 }
