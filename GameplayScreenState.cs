@@ -5,6 +5,7 @@ namespace ShogiClient
     public class GameplayScreenState : ScreenState
     {
         public PlayerData CurrentPlayer => IsPlayerOneTurn ? PlayerOne : PlayerTwo;
+        public PlayerData OpponentPlayer => IsPlayerOneTurn ? PlayerTwo : PlayerOne;
 
         private bool isPlayerOneTurn = true;
         public bool IsPlayerOneTurn

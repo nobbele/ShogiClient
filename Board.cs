@@ -11,6 +11,8 @@ namespace ShogiClient
         // If null, that means it's taken from the hand
         public Point? HeldPiecePickUpPosition { get; set; } = null;
 
+        public GameplayScreenState GameplayState { get; set; }
+
         /// <summary>
         ///   Removes a piece from the board and puts it in the HeldPiece property.
         /// </summary>
@@ -31,7 +33,7 @@ namespace ShogiClient
         {
             captured = null;
 
-            if (!Utils.ValidMovesForPiece(HeldPiece, Data, from).Contains(target))
+            if (!Utils.ValidMovesForPiece(HeldPiece, Data, from, GameplayState.CurrentPlayer, GameplayState.OpponentPlayer).Contains(target))
             {
                 return false;
             }
@@ -50,7 +52,7 @@ namespace ShogiClient
         /// </summary>
         public bool PlacePieceFromHand(Point target)
         {
-            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data).Contains(target))
+            if (!Utils.ValidPositionsForPieceDrop(HeldPiece, Data, GameplayState.CurrentPlayer, GameplayState.OpponentPlayer).Contains(target))
             {
                 return false;
             }

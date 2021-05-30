@@ -17,6 +17,10 @@ namespace ShogiClient
 
         private GameResources resources;
 
+        // These don't matter for now, it's just required to check valid moves
+        private PlayerData playerA = new PlayerData();
+        private PlayerData playerB = new PlayerData();
+
         public UIMiniBoard(GameResources resources, int width, int height)
         {
             this.resources = resources;
@@ -72,7 +76,7 @@ namespace ShogiClient
 
             var drawMovesPiece = Data.GetAt(DrawMovesPiece);
             List<Point> validMoves;
-            validMoves = Utils.ValidMovesForPiece(drawMovesPiece, Data, DrawMovesPiece);
+            validMoves = Utils.ValidMovesForPiece(drawMovesPiece, Data, DrawMovesPiece, playerA, playerB);
 
             foreach (var validMove in validMoves)
             {

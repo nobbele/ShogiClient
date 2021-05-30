@@ -28,6 +28,8 @@ namespace ShogiClient
         {
             base.Initialize(resources);
 
+            State.BoardState.GameplayState = State;
+
             board = new DrawableBoard(resources, State.BoardState)
             {
                 Position = Game.WindowSize / 2,
@@ -349,13 +351,19 @@ namespace ShogiClient
 
             State.IsCheck = false;
             State.IsCheckMate = false;
-            if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
+            if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn, State.CurrentPlayer, State.OpponentPlayer))
             {
                 State.IsCheck = true;
-                if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
+                if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn, State.CurrentPlayer, State.OpponentPlayer))
                 {
                     State.IsCheckMate = true;
                 }
+
+                State.OpponentPlayer.CheckCount += 1;
+            }
+            else
+            {
+                State.OpponentPlayer.CheckCount = 0;
             }
 
             State.clockRunning = true;

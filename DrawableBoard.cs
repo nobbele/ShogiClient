@@ -92,11 +92,11 @@ namespace ShogiClient
                 List<Point> validMoves;
                 if (State.HeldPiecePickUpPosition is Point pickUpPosition)
                 {
-                    validMoves = Utils.ValidMovesForPiece(State.HeldPiece, State.Data, pickUpPosition);
+                    validMoves = Utils.ValidMovesForPiece(State.HeldPiece, State.Data, pickUpPosition, State.GameplayState.CurrentPlayer, State.GameplayState.OpponentPlayer);
                 }
                 else
                 {
-                    validMoves = Utils.ValidPositionsForPieceDrop(State.HeldPiece, State.Data);
+                    validMoves = Utils.ValidPositionsForPieceDrop(State.HeldPiece, State.Data, State.GameplayState.CurrentPlayer, State.GameplayState.OpponentPlayer);
                 }
 
                 foreach (var validMove in validMoves)
