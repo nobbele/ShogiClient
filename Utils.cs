@@ -200,6 +200,8 @@ namespace ShogiClient
         /// </summary>
         /// <param name="board">The grid that houses the pieces to check over.</param>
         /// <param name="isPlayerOne">Whether or not the player checking for the opponent is player 1 or 2.</param>
+        /// <param name="currentPlayer">Player data for the current player.</param>
+        /// <param name="opponentPlayer">Player data for the opponent player.</param>
         /// <returns>
         ///   A dictionary where the key is a specific location of the opponent piece
         ///   and the value is a list of positions that the piece in the key can move to, the tiles it has control over.
@@ -231,8 +233,9 @@ namespace ShogiClient
         /// </summary>
         /// <param name="piece">The piece to check legal moves on.</param>
         /// <param name="board">The grid that houses the pieces to check over.</param>
-        /// <param name="currentX">X Position of the specified piece.</param>
-        /// <param name="currentY">Y Position of the specified piece.</param>
+        /// <param name="currentPosition">Position of the specified piece.</param>
+        /// <param name="currentPlayer">Player data for the current player.</param>
+        /// <param name="opponentPlayer">Player data for the opponent player.</param>
         /// <param name="checkForCheck">Whether or not to check if a move will cause a check for the player moving.</param>
         /// <returns>
         ///   A list of positions that the piece in the piece specified can move to.
@@ -338,6 +341,8 @@ namespace ShogiClient
         /// </summary>
         /// <param name="piece">The piece to check legal positions on.</param>
         /// <param name="board">The grid that houses the pieces to check over.</param>
+        /// <param name="currentPlayer">Player data for the current player.</param>
+        /// <param name="opponentPlayer">Player data for the opponent player.</param>
         /// <returns>
         ///   A list of positions that the piece in the piece specified can be dropped to.
         /// </returns>
@@ -399,6 +404,8 @@ namespace ShogiClient
         /// </summary>
         /// <param name="board">The grid that houses the pieces to check over.</param>
         /// <param name="isPlayerOne">For which player to check for checkmate.</param>
+        /// <param name="currentPlayer">Player data for the current player.</param>
+        /// <param name="opponentPlayer">Player data for the opponent player.</param>
         /// <returns>
         ///   true if checkmate, false if not.
         /// </returns>
@@ -423,6 +430,8 @@ namespace ShogiClient
         /// </summary>
         /// <param name="board">The grid that houses the pieces to check over.</param>
         /// <param name="isPlayerOne">For which player's king to check for check.</param>
+        /// <param name="currentPlayer">Player data for the current player.</param>
+        /// <param name="opponentPlayer">Player data for the opponent player.</param>
         /// <returns>
         ///   true if in check, false if not.
         /// </returns>
@@ -448,10 +457,10 @@ namespace ShogiClient
         /// </summary>
         /// <param name="piece">The piece to check who's move will check the king or not.</param>
         /// <param name="board">The grid that houses the pieces to check over.</param>
-        /// <param name="currentX">X Position of the specified piece.</param>
-        /// <param name="currentY">Y Position of the specified piece.</param>
-        /// <param name="targetX">X Position of where the specified piece will move to.</param>
-        /// <param name="targetY">Y Position of where the specified piece will move to.</param>
+        /// <param name="current">Position of the specified piece.</param>
+        /// <param name="target">Position of where the specified piece will move to.</param>
+        /// <param name="currentPlayer">Player data for the current player.</param>
+        /// <param name="opponentPlayer">Player data for the opponent player.</param>
         /// <returns>
         ///   true if will check, false if not.
         /// </returns>
@@ -469,10 +478,10 @@ namespace ShogiClient
         /// </summary>
         /// <param name="piece">The piece to check who's move will check the king or not.</param>
         /// <param name="board">The grid that houses the pieces to check over.</param>
-        /// <param name="currentX">X Position of the specified piece.</param>
-        /// <param name="currentY">Y Position of the specified piece.</param>
-        /// <param name="targetX">X Position of where the specified piece will move to.</param>
-        /// <param name="targetY">Y Position of where the specified piece will move to.</param>
+        /// <param name="current">Position of the specified piece.</param>
+        /// <param name="target">Position of where the specified piece will move to.</param>
+        /// <param name="currentPlayer">Player data for the current player.</param>
+        /// <param name="opponentPlayer">Player data for the opponent player.</param>
         /// <param name="isPlayerOne">For which player's king to check for check.</param>
         /// <returns>
         ///   true if it will check, false if not.
