@@ -28,6 +28,8 @@ namespace ShogiClient
         {
             base.Initialize(resources);
 
+            State.BoardState.GameplayState = State;
+
             board = new DrawableBoard(resources, State.BoardState)
             {
                 Position = Game.WindowSize / 2,
@@ -317,6 +319,15 @@ namespace ShogiClient
                 }
             }
 
+            if (State.CurrentPlayer.TimeLeft <= 0)
+            {
+                // TODO Lose by running out of time
+            }
+            else if (State.clockRunning)
+            {
+                State.CurrentPlayer.TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+
             if (board.State.HeldPiece != null)
             {
                 board.State.HeldPiecePosition = mousePosition;
@@ -331,6 +342,7 @@ namespace ShogiClient
             optionsButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             helpButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             takeBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            turnTable.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
         public void EndOfTurn()
@@ -339,14 +351,22 @@ namespace ShogiClient
 
             State.IsCheck = false;
             State.IsCheckMate = false;
-            if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn))
+            if (Utils.IsKingChecked(board.State.Data, State.IsPlayerOneTurn, State.CurrentPlayer, State.OpponentPlayer))
             {
                 State.IsCheck = true;
-                if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn))
+                if (Utils.IsKingCheckMated(board.State.Data, State.IsPlayerOneTurn, State.CurrentPlayer, State.OpponentPlayer))
                 {
                     State.IsCheckMate = true;
                 }
+
+                State.OpponentPlayer.CheckCount += 1;
             }
+            else
+            {
+                State.OpponentPlayer.CheckCount = 0;
+            }
+
+            State.clockRunning = true;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -376,18 +396,22 @@ namespace ShogiClient
 {Utils.PieceTypeToKanji(PieceType.Gold, true, false)} - Gold
 {Utils.PieceTypeToKanji(PieceType.King, true, false)}/{Utils.PieceTypeToKanji(PieceType.King, false, false)} - King";
             spriteBatch.DrawString(Resources.PieceFont, tableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 2 / 6) - Resources.PieceFont.MeasureString(tableText) / 2, Color.White);
-            var promotedTableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, false)} - Pawn
-{Utils.PieceTypeToKanji(PieceType.Bishop, true, true)} - Bishop
-{Utils.PieceTypeToKanji(PieceType.Rook, true, true)} - Rook
-{Utils.PieceTypeToKanji(PieceType.Lance, true, true)} - Lance
-{Utils.PieceTypeToKanji(PieceType.Knight, true, true)} - Knight
-{Utils.PieceTypeToKanji(PieceType.Silver, true, true)} - Silver";
+            var promotedTableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, true)} - tokin (Promoted Pawn)
+{Utils.PieceTypeToKanji(PieceType.Bishop, true, true)} - Horse (Promoted Bishop)
+{Utils.PieceTypeToKanji(PieceType.Rook, true, true)} - Dragon (Promoted Rook)
+{Utils.PieceTypeToKanji(PieceType.Lance, true, true)} - Promoted Lance
+{Utils.PieceTypeToKanji(PieceType.Knight, true, true)} - Promoted Knight
+{Utils.PieceTypeToKanji(PieceType.Silver, true, true)} - Promoted Silver";
             spriteBatch.DrawString(Resources.PieceFont, promotedTableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 4 / 6) - Resources.PieceFont.MeasureString(promotedTableText) / 2, Color.Red);
             if (State.TurnList.Count > 0)
             {
                 var lastMoveText = State.TurnList[State.TurnList.Count - 1].ToNotation();
                 spriteBatch.DrawString(Resources.PieceFont, lastMoveText, new Vector2(Game.WindowSize.X / 12, Game.WindowSize.Y / 2) - Resources.PieceFont.MeasureString(lastMoveText) / 2, Color.Black);
             }
+            var playerOneTimerText = $"{(int)(State.PlayerOne.TimeLeft / 60):00}:{(int)(State.PlayerOne.TimeLeft % 60):00}";
+            spriteBatch.DrawString(Resources.PieceFont, playerOneTimerText, new Vector2(Game.WindowSize.X / 2, Game.WindowSize.Y - 95) - Resources.PieceFont.MeasureString(playerOneTimerText) / 2, Color.Black);
+            var playerTwoTimerText = $"{(int)(State.PlayerTwo.TimeLeft / 60):00}:{(int)(State.PlayerTwo.TimeLeft % 60):00}";
+            spriteBatch.DrawString(Resources.PieceFont, playerTwoTimerText, new Vector2(Game.WindowSize.X / 2, 95) - Resources.PieceFont.MeasureString(playerTwoTimerText) / 2, Color.Black);
         }
     }
 }

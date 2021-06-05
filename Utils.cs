@@ -204,14 +204,14 @@ namespace ShogiClient
         ///   A dictionary where the key is a specific location of the opponent piece
         ///   and the value is a list of positions that the piece in the key can move to, the tiles it has control over.
         /// </returns>
-        public static Dictionary<Point, List<Point>> OpponentControl(Grid<PieceData> board, bool isPlayerOne)
+        public static Dictionary<Point, List<Point>> OpponentControl(Grid<PieceData> board, bool isPlayerOne, PlayerData currentPlayer, PlayerData opponentPlayer)
         {
             var opponentControl = new Dictionary<Point, List<Point>>();
             foreach (var piece in board)
             {
                 if (piece.Content != null && piece.Content.IsPlayerOne != isPlayerOne)
                 {
-                    opponentControl.Add(piece.Position, ValidMovesForPiece(piece.Content, board, piece.Position, false));
+                    opponentControl.Add(piece.Position, ValidMovesForPiece(piece.Content, board, piece.Position, currentPlayer, opponentPlayer, false));
                 }
             }
             for (int y = 0; y < board.Height; y++)
@@ -241,6 +241,8 @@ namespace ShogiClient
             PieceData piece,
             Grid<PieceData> board,
             Point currentPosition,
+            PlayerData currentPlayer,
+            PlayerData opponentPlayer,
             bool checkForCheck = true)
         {
             var moveSet = Utils.PieceTypeMoveSet(piece.Type, piece.Promoted);
@@ -284,7 +286,18 @@ namespace ShogiClient
                                 if (!occupiedTile)
                                 {
                                     // If checkForCheck is true, it will check so the move doesn't cause a check for the player.
-                                    if (!checkForCheck || !WillMoveCauseCheck(piece, board, currentPosition, positionOnBoard))
+                                    bool isValid = true;
+                                    if (checkForCheck)
+                                    {
+                                        var willMoveCauseCheck = WillMoveCauseCheck(piece, board, currentPosition, positionOnBoard, currentPlayer, opponentPlayer);
+                                        var willMoveCauseOpponentCheck = WillMoveCauseCheckFor(piece, board, currentPosition, positionOnBoard, opponentPlayer, currentPlayer, !piece.IsPlayerOne);
+                                        if ((currentPlayer.CheckCount > 3 && willMoveCauseOpponentCheck) || willMoveCauseCheck)
+                                        {
+                                            isValid = false;
+                                        }
+                                    }
+
+                                    if (isValid)
                                     {
                                         validMoves.Add(positionOnBoard);
                                     }
@@ -300,7 +313,15 @@ namespace ShogiClient
                                 );
                                 if (checkForCheck)
                                 {
-                                    moves = moves.Where(move => !WillMoveCauseCheck(piece, board, currentPosition, move)).ToList();
+                                    moves = moves.Where(move =>
+                                    {
+                                        var willMoveCauseCheck = WillMoveCauseCheck(piece, board, currentPosition, move, currentPlayer, opponentPlayer);
+                                        if (currentPlayer.CheckCount > 3 && willMoveCauseCheck)
+                                        {
+                                            return false;
+                                        }
+                                        return !willMoveCauseCheck;
+                                    }).ToList();
                                 }
                                 validMoves.AddRange(moves);
                             }
@@ -322,7 +343,9 @@ namespace ShogiClient
         /// </returns>
         public static List<Point> ValidPositionsForPieceDrop(
             PieceData piece,
-            Grid<PieceData> board)
+            Grid<PieceData> board,
+            PlayerData currentPlayer,
+            PlayerData opponentPlayer)
         {
             var validMoves = new List<Point>();
 
@@ -351,13 +374,13 @@ namespace ShogiClient
                 {
                     // Two pawn drop: You can't drop a pawn in a column where you already have a pawn.
                     // Mate pawn drop: You can't drop a pawn on a tile that will instantly cause a check for the opponent king.
-                    if (pawnColumns[tile.Position.X] || Utils.WillMoveCauseCheckFor(piece, board, tile.Position, tile.Position, !piece.IsPlayerOne))
+                    if (pawnColumns[tile.Position.X] || Utils.WillMoveCauseCheckFor(piece, board, tile.Position, tile.Position, opponentPlayer, currentPlayer, !piece.IsPlayerOne))
                     {
                         legalPosition = false;
                     }
                 }
 
-                if (Utils.WillMoveCauseCheck(piece, board, tile.Position, tile.Position))
+                if (Utils.WillMoveCauseCheck(piece, board, tile.Position, tile.Position, currentPlayer, opponentPlayer))
                 {
                     legalPosition = false;
                 }
@@ -379,13 +402,13 @@ namespace ShogiClient
         /// <returns>
         ///   true if checkmate, false if not.
         /// </returns>
-        public static bool IsKingCheckMated(Grid<PieceData> board, bool isPlayerOne)
+        public static bool IsKingCheckMated(Grid<PieceData> board, bool isPlayerOne, PlayerData currentPlayer, PlayerData opponentPlayer)
         {
             foreach (var tile in board)
             {
                 if (tile.Content != null && tile.Content.IsPlayerOne == isPlayerOne)
                 {
-                    if (ValidMovesForPiece(tile.Content, board, tile.Position).Count > 0)
+                    if (ValidMovesForPiece(tile.Content, board, tile.Position, currentPlayer, opponentPlayer).Count > 0)
                     {
                         return false;
                     }
@@ -403,12 +426,12 @@ namespace ShogiClient
         /// <returns>
         ///   true if in check, false if not.
         /// </returns>
-        public static bool IsKingChecked(Grid<PieceData> board, bool isPlayerOne)
+        public static bool IsKingChecked(Grid<PieceData> board, bool isPlayerOne, PlayerData currentPlayer, PlayerData opponentPlayer)
         {
             var possibleKingPiece = GetPlayerKing(board, isPlayerOne);
             if (possibleKingPiece is (PieceData piece, Point position) kingPiece)
             {
-                var opponentControl = OpponentControl(board, isPlayerOne);
+                var opponentControl = OpponentControl(board, isPlayerOne, currentPlayer, opponentPlayer);
                 var pieceThatCanTakeKing = opponentControl
                     .Where((pair) => pair.Value.Contains(kingPiece.Position))
                     .ToList();
@@ -436,8 +459,10 @@ namespace ShogiClient
             PieceData piece,
             Grid<PieceData> board,
             Point current,
-            Point target)
-            => WillMoveCauseCheckFor(piece, board, current, target, piece.IsPlayerOne);
+            Point target,
+            PlayerData currentPlayer,
+            PlayerData opponentPlayer)
+            => WillMoveCauseCheckFor(piece, board, current, target, currentPlayer, opponentPlayer, piece.IsPlayerOne);
 
         /// <summary>
         ///   Checks if the specified move will cause a check to the player's king who's piece is being moved.
@@ -457,6 +482,8 @@ namespace ShogiClient
             Grid<PieceData> board,
             Point current,
             Point target,
+            PlayerData currentPlayer,
+            PlayerData opponentPlayer,
             bool isPlayerOne)
         {
             var tempBoard = board.Clone();
@@ -464,7 +491,7 @@ namespace ShogiClient
             tempBoard.SetAt(current.X, current.Y, null);
             tempBoard.SetAt(target.X, target.Y, piece);
 
-            return IsKingChecked(tempBoard, isPlayerOne);
+            return IsKingChecked(tempBoard, isPlayerOne, currentPlayer, opponentPlayer);
         }
 
         /// <summary>
