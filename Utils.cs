@@ -16,7 +16,7 @@ namespace ShogiClient
         ///   If an empty character is passed, it's assumed to be a non-piece and so returns null.
         /// </returns>
         /// <remarks>
-        ///   Note, an empty and an invalid piece type are very different, passing an invalid piece type which will throw an exception while an empty one will return null.
+        ///   Note, an empty and an invalid piece type are very different, passing an invalid (ex. 'U') piece type which will throw an exception while an empty (single space, ' ') one will return null.
         /// </remarks>
         public static (PieceType type, bool promoted)? PieceNotationToPieceType(char c)
         {
@@ -42,7 +42,15 @@ namespace ShogiClient
             return ((PieceType, bool)?)(type, char.IsUpper(c));
         }
 
-        // TODO Documentation
+        /// <summary>
+        ///   Converts the corresponding <see cref="PieceType"/> and promotion status to the corresponding letter.
+        ///   The inverse of <see cref="PieceNotationToPieceType" />
+        /// </summary>
+        /// <param name="type">The type of the piece</param>
+        /// <param name="promoted">If the piece is promoted or not</param>
+        /// <returns>
+        ///   The correct ASCII letter
+        /// </returns>
         public static char PieceTypeToNotationChar(PieceType type, bool promoted)
         {
             var character = type switch
@@ -107,12 +115,13 @@ namespace ShogiClient
         /// <summary>
         ///   Returns the move set defined for specified <paramref name="type"/> piece.
         /// </summary>
-        /// <param name="type">The type used to decided if it can be promoted.</param>
+        /// <param name="type">The type used to check</param>
+        /// <param name="isPromoted">If the piece is promoted or not.</param>
         /// <returns>
-        ///   A string array where each element is a row, each char in the string is the column.
-        ///   '.' denotes where in the move set the piece to move is located, usually the center.
-        ///   'S' represents a move where the piece can only walk 1 step in that direction.
-        ///   'J' denotes a move similar to S but the piece can jump over any pieces in the way.
+        ///   A string array where each element is a row, each char in the string is the column.<br/>
+        ///   '.' denotes where in the move set the piece to move is located, usually the center.<br/>
+        ///   'S' represents a move where the piece can only walk 1 step in that direction.<br/>
+        ///   'J' denotes a move similar to S but the piece can jump over any pieces in the way.<br/>
         ///   'M' represents a move in which the piece can move arbitrarily far in the direction the char is located, it may not pass through any pieces on the way
         /// </returns>
         public static string[] PieceTypeMoveSet(PieceType type, bool isPromoted) => type switch
