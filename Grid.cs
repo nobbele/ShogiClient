@@ -1,14 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 
 namespace ShogiClient
 {
+    [JsonObject]
     public class Grid<T> : IEnumerable<(T Content, Point Position)>
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
 
+        [JsonProperty]
         private T[][] Data;
 
         public Grid(int width, int height)

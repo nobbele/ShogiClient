@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 
 namespace ShogiClient
 {
@@ -11,6 +12,7 @@ namespace ShogiClient
         // If null, that means it's taken from the hand
         public Point? HeldPiecePickUpPosition { get; set; } = null;
 
+        [JsonIgnore]
         public GameplayScreenState GameplayState { get; set; }
 
         /// <summary>

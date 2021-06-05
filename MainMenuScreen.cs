@@ -1,7 +1,9 @@
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Newtonsoft.Json;
 
 namespace ShogiClient
 {
@@ -11,6 +13,7 @@ namespace ShogiClient
         private UIButton optionsButton;
         private UIButton exitGameButton;
         private UIButton playPauseButton;
+        private UIButton startFromSaveButton;
 
         public MainMenuScreen(Game1 game) : base(game)
         {
@@ -30,6 +33,25 @@ namespace ShogiClient
             startGameButton.OnClick += () =>
             {
                 Game.SetCurrentScreen(new GameplayScreen(Game));
+            };
+
+            startFromSaveButton = new UIButton(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X / 4, Game.WindowSize.Y * 2 / 5),
+                Size = new Vector2(200, 100),
+                Text = "Start Game From Last Save",
+            };
+            startFromSaveButton.OnClick += () =>
+            {
+                string json = File.ReadAllText("save.json");
+                var gameplayState = JsonConvert.DeserializeObject<GameplayScreenState>(json, new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.Auto
+                });
+                Game.SetCurrentScreen(new GameplayScreen(Game)
+                {
+                    State = gameplayState
+                });
             };
 
             optionsButton = new UIButton(resources)
@@ -80,6 +102,10 @@ namespace ShogiClient
             optionsButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             exitGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             playPauseButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            if (File.Exists("save.json"))
+            {
+                startFromSaveButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -93,6 +119,10 @@ namespace ShogiClient
             optionsButton.Draw(spriteBatch);
             exitGameButton.Draw(spriteBatch);
             playPauseButton.Draw(spriteBatch);
+            if (File.Exists("save.json"))
+            {
+                startFromSaveButton.Draw(spriteBatch);
+            }
         }
     }
 }

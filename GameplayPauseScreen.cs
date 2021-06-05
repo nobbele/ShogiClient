@@ -1,7 +1,9 @@
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Newtonsoft.Json;
 
 namespace ShogiClient
 {
@@ -15,6 +17,8 @@ namespace ShogiClient
         private UIButton continueGameButton;
         private UIButton restartGameButton;
         private UIButton goBackButton;
+        private UIButton saveButton;
+        private UIButton loadButton;
         private UIText pausedText;
 
         public GameplayPauseScreen(Game1 game, GameResources resources, GameplayScreenState gameplayState, Texture2D background) : base(game)
@@ -38,6 +42,39 @@ namespace ShogiClient
             {
                 ReturnToGame();
             };
+
+            saveButton = new UIButton(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X / 4, 250),
+                Size = new Vector2(200, 100),
+                Text = "Save",
+            };
+            saveButton.OnClick += () =>
+            {
+                string json = JsonConvert.SerializeObject(this.gameplayState, new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Formatting = Formatting.Indented,
+                });
+                File.WriteAllText("save.json", json);
+            };
+
+            loadButton = new UIButton(resources)
+            {
+                Position = new Vector2(Game.WindowSize.X / 4, 360),
+                Size = new Vector2(200, 100),
+                Text = "Load",
+            };
+            loadButton.OnClick += () =>
+            {
+                string json = File.ReadAllText("save.json");
+                this.gameplayState = JsonConvert.DeserializeObject<GameplayScreenState>(json, new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.Auto
+                });
+                ReturnToGame();
+            };
+
             restartGameButton = new UIButton(resources)
             {
                 Position = new Vector2(Game.WindowSize.X / 2, 360),
@@ -88,6 +125,11 @@ namespace ShogiClient
             continueGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             restartGameButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
             goBackButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            saveButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            if (File.Exists("save.json"))
+            {
+                loadButton.Update(gameTime, keyboardState, mouseState, prevMouseState);
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -98,6 +140,11 @@ namespace ShogiClient
             continueGameButton.Draw(spriteBatch);
             restartGameButton.Draw(spriteBatch);
             goBackButton.Draw(spriteBatch);
+            saveButton.Draw(spriteBatch);
+            if (File.Exists("save.json"))
+            {
+                loadButton.Draw(spriteBatch);
+            }
         }
     }
 }
