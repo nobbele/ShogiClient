@@ -16,6 +16,6 @@ namespace ShogiClient
         }
 
         public string ToNotation()
-            => $"V{Utils.PieceTypeToNotationChar(Type, false)}{(char)('A' + X)}{Y}{(DidCheck ? "#" : string.Empty)}";
+            => $"V{Utils.PieceToNotationChar(new PieceData { Type = Type, Promoted = false })}{(char)('A' + X)}{Y}{(DidCheck ? "#" : string.Empty)}";
     }
 }

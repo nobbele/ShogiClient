@@ -47,7 +47,7 @@ namespace ShogiClient
                     // since you can't capture the king it doesn't matter what the value is.
                     // The third parameter (promoted) is used to get promoted character.
                     // since captured pieces automatically demote, it should be set to false.
-                    var piecePrint = Utils.PieceTypeToKanji(type, false, false);
+                    var piecePrint = Utils.PieceToKanji(new PieceData { Type = type, Promoted = false });
 
                     // Can not scale the string as the character will become ugly
                     spriteBatch.DrawString(

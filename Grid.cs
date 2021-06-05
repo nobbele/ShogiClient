@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace ShogiClient
 {
     [JsonObject]
-    public class Grid<T> : IEnumerable<(T Content, Point Position)>
+    public class Grid<T> : IEnumerable<GridRef<T>>
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -25,8 +25,8 @@ namespace ShogiClient
             }
         }
 
-        public T GetAt(int x, int y) => Data[y][x];
-        public T GetAt(Point point) => Data[point.Y][point.X];
+        public GridRef<T> GetAt(int x, int y) => GetAt(new Point { X = x, Y = y });
+        public GridRef<T> GetAt(Point point) => new GridRef<T> { Data = Data[point.Y][point.X], Position = point };
         public void SetAt(int x, int y, T data) => Data[y][x] = data;
         public void SetAt(Point point, T data) => Data[point.Y][point.X] = data;
 
@@ -48,13 +48,13 @@ namespace ShogiClient
             return clone;
         }
 
-        public IEnumerator<(T Content, Point Position)> GetEnumerator()
+        public IEnumerator<GridRef<T>> GetEnumerator()
         {
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    yield return (GetAt(x, y), new Point(x, y));
+                    yield return GetAt(x, y);
                 }
             }
         }

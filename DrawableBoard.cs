@@ -49,7 +49,7 @@ namespace ShogiClient
                 0
             );
 
-            var piecePrint = Utils.PieceTypeToKanji(piece.Type, piece.IsPlayerOne, piece.Promoted);
+            var piecePrint = Utils.PieceToKanji(piece);
 
             var piecePrintPosition = tilePosition + (piece.IsPlayerOne ? new Vector2(0, 2) : new Vector2(0, -4)) * Scale;
 
@@ -72,7 +72,7 @@ namespace ShogiClient
 
                     spriteBatch.Draw(resources.Tile, tilePosition, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
 
-                    var piece = State.Data.GetAt(x, y);
+                    var piece = State.Data.GetAt(x, y).Data;
                     if (piece != null)
                     {
                         DrawPiece(spriteBatch, piece, tilePosition + TileSize / 2);
@@ -92,7 +92,7 @@ namespace ShogiClient
                 List<Point> validMoves;
                 if (State.HeldPiecePickUpPosition is Point pickUpPosition)
                 {
-                    validMoves = Utils.ValidMovesForPiece(State.HeldPiece, State.Data, pickUpPosition, State.GameplayState.CurrentPlayer, State.GameplayState.OpponentPlayer);
+                    validMoves = Utils.ValidMovesForPiece(new GridRef<PieceData> { Data = State.HeldPiece, Position = pickUpPosition }, State.Data, State.GameplayState.CurrentPlayer, State.GameplayState.OpponentPlayer);
                 }
                 else
                 {

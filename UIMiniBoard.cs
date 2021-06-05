@@ -43,7 +43,7 @@ namespace ShogiClient
                 0
             );
 
-            var piecePrint = Utils.PieceTypeToKanji(piece.Type, piece.IsPlayerOne, piece.Promoted);
+            var piecePrint = Utils.PieceToKanji(piece);
 
             var piecePrintPosition = tilePosition + (piece.IsPlayerOne ? new Vector2(0, 2) : new Vector2(0, -4)) * Scale;
 
@@ -66,7 +66,7 @@ namespace ShogiClient
 
                     spriteBatch.Draw(resources.Tile, tilePosition, null, Color.White, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
 
-                    var piece = Data.GetAt(x, y);
+                    var piece = Data.GetAt(x, y).Data;
                     if (piece != null)
                     {
                         DrawPiece(spriteBatch, piece, tilePosition + TileSize / 2);
@@ -76,7 +76,7 @@ namespace ShogiClient
 
             var drawMovesPiece = Data.GetAt(DrawMovesPiece);
             List<Point> validMoves;
-            validMoves = Utils.ValidMovesForPiece(drawMovesPiece, Data, DrawMovesPiece, playerA, playerB);
+            validMoves = Utils.ValidMovesForPiece(drawMovesPiece, Data, playerA, playerB);
 
             foreach (var validMove in validMoves)
             {

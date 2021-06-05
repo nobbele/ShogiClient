@@ -43,17 +43,16 @@ namespace ShogiClient
         }
 
         /// <summary>
-        ///   Converts the corresponding <see cref="PieceType"/> and promotion status to the corresponding letter.
+        ///   Converts the corresponding <see cref="PieceData"/> to the corresponding letter.
         ///   The inverse of <see cref="PieceNotationToPieceType" />
         /// </summary>
-        /// <param name="type">The type of the piece</param>
-        /// <param name="promoted">If the piece is promoted or not</param>
+        /// <param name="piece">The piece</param>
         /// <returns>
         ///   The correct ASCII letter
         /// </returns>
-        public static char PieceTypeToNotationChar(PieceType type, bool promoted)
+        public static char PieceToNotationChar(PieceData piece)
         {
-            var character = type switch
+            var character = piece.Type switch
             {
                 PieceType.Pawn => 'P',
                 PieceType.Bishop => 'B',
@@ -66,7 +65,7 @@ namespace ShogiClient
                 _ => throw new ArgumentException(),
             };
 
-            if (promoted)
+            if (piece.Promoted)
                 return char.ToUpper(character);
             else
                 return char.ToLower(character);
@@ -75,22 +74,20 @@ namespace ShogiClient
         /// <summary>
         ///   Converts <paramref name="type"/> to the corresponding Kanji used to identify the piece.
         /// </summary>
-        /// <param name="type">The type to get the Kanji for</param>
-        /// <param name="isPlayerOne">Used to decide whether or not the king should be jeweled or not. (true is jeweled, false is not)</param>
-        /// <param name="isPromoted">Used to decide whether or not to get the Kanji for the promoted form of the piece.</param>
+        /// <param name="piece">The piece to get the Kanji for</param>
         /// <returns>
         ///   The Kanji corresponding to specified type, player side and promotion options.
         /// </returns>
-        public static string PieceTypeToKanji(PieceType type, bool isPlayerOne, bool isPromoted) => type switch
+        public static string PieceToKanji(PieceData piece) => piece.Type switch
         {
-            PieceType.Pawn => !isPromoted ? "歩" : "と",
-            PieceType.Bishop => !isPromoted ? "角" : "馬",
-            PieceType.Rook => !isPromoted ? "飛" : "龍",
-            PieceType.Lance => !isPromoted ? "香" : "香",
-            PieceType.Knight => !isPromoted ? "桂" : "圭",
-            PieceType.Silver => !isPromoted ? "銀" : "全",
+            PieceType.Pawn => !piece.Promoted ? "歩" : "と",
+            PieceType.Bishop => !piece.Promoted ? "角" : "馬",
+            PieceType.Rook => !piece.Promoted ? "飛" : "龍",
+            PieceType.Lance => !piece.Promoted ? "香" : "香",
+            PieceType.Knight => !piece.Promoted ? "桂" : "圭",
+            PieceType.Silver => !piece.Promoted ? "銀" : "全",
             PieceType.Gold => "金",
-            PieceType.King => isPlayerOne ? "玉" : "王",
+            PieceType.King => piece.IsPlayerOne ? "玉" : "王",
             _ => throw new System.Exception("Unknown Piece Type"),
         };
 
@@ -115,8 +112,7 @@ namespace ShogiClient
         /// <summary>
         ///   Returns the move set defined for specified <paramref name="type"/> piece.
         /// </summary>
-        /// <param name="type">The type used to check</param>
-        /// <param name="isPromoted">If the piece is promoted or not.</param>
+        /// <param name="piece">The piece to check</param>
         /// <returns>
         ///   A string array where each element is a row, each char in the string is the column.<br/>
         ///   '.' denotes where in the move set the piece to move is located, usually the center.<br/>
@@ -124,9 +120,9 @@ namespace ShogiClient
         ///   'J' denotes a move similar to S but the piece can jump over any pieces in the way.<br/>
         ///   'M' represents a move in which the piece can move arbitrarily far in the direction the char is located, it may not pass through any pieces on the way
         /// </returns>
-        public static string[] PieceTypeMoveSet(PieceType type, bool isPromoted) => type switch
+        public static string[] PieceMoveSet(PieceData piece) => piece.Type switch
         {
-            PieceType.Pawn => !isPromoted ? new string[] {
+            PieceType.Pawn => !piece.Promoted ? new string[] {
                 " S ",
                 " . ",
                 "   ",
@@ -135,7 +131,7 @@ namespace ShogiClient
                 "S.S",
                 " S ",
             },
-            PieceType.Bishop => !isPromoted ? new string[] {
+            PieceType.Bishop => !piece.Promoted ? new string[] {
                 "M M",
                 " . ",
                 "M M",
@@ -144,7 +140,7 @@ namespace ShogiClient
                 "S.S",
                 "MSM",
             },
-            PieceType.Rook => !isPromoted ? new string[] {
+            PieceType.Rook => !piece.Promoted ? new string[] {
                 " M ",
                 "M.M",
                 " M ",
@@ -153,7 +149,7 @@ namespace ShogiClient
                 "M.M",
                 "SMS",
             },
-            PieceType.Lance => !isPromoted ? new string[] {
+            PieceType.Lance => !piece.Promoted ? new string[] {
                 " M ",
                 " . ",
                 "   ",
@@ -162,7 +158,7 @@ namespace ShogiClient
                 "S.S",
                 " S ",
             },
-            PieceType.Knight => !isPromoted ? new string[] {
+            PieceType.Knight => !piece.Promoted ? new string[] {
                 "J J",
                 "   ",
                 " . ",
@@ -173,7 +169,7 @@ namespace ShogiClient
                 "S.S",
                 " S ",
             },
-            PieceType.Silver => !isPromoted ? new string[] {
+            PieceType.Silver => !piece.Promoted ? new string[] {
                 "SSS",
                 " . ",
                 "S S",
@@ -211,9 +207,9 @@ namespace ShogiClient
             var opponentControl = new Dictionary<Point, List<Point>>();
             foreach (var piece in board)
             {
-                if (piece.Content != null && piece.Content.IsPlayerOne != isPlayerOne)
+                if (piece.Data != null && piece.Data.IsPlayerOne != isPlayerOne)
                 {
-                    opponentControl.Add(piece.Position, ValidMovesForPiece(piece.Content, board, piece.Position, currentPlayer, opponentPlayer, false));
+                    opponentControl.Add(piece.Position, ValidMovesForPiece(piece, board, currentPlayer, opponentPlayer, false));
                 }
             }
             for (int y = 0; y < board.Height; y++)
@@ -233,7 +229,6 @@ namespace ShogiClient
         /// </summary>
         /// <param name="piece">The piece to check legal moves on.</param>
         /// <param name="board">The grid that houses the pieces to check over.</param>
-        /// <param name="currentPosition">Position of the specified piece.</param>
         /// <param name="currentPlayer">Player data for the current player.</param>
         /// <param name="opponentPlayer">Player data for the opponent player.</param>
         /// <param name="checkForCheck">Whether or not to check if a move will cause a check for the player moving.</param>
@@ -241,14 +236,13 @@ namespace ShogiClient
         ///   A list of positions that the piece in the piece specified can move to.
         /// </returns>
         public static List<Point> ValidMovesForPiece(
-            PieceData piece,
+            GridRef<PieceData> piece,
             Grid<PieceData> board,
-            Point currentPosition,
             PlayerData currentPlayer,
             PlayerData opponentPlayer,
             bool checkForCheck = true)
         {
-            var moveSet = Utils.PieceTypeMoveSet(piece.Type, piece.Promoted);
+            var moveSet = Utils.PieceMoveSet(piece.Data);
             // Center of the move set, aka the position where the piece is located.
             var center = new Point(-1, -1);
             for (int y = 0; y < moveSet.Length; y++)
@@ -275,13 +269,13 @@ namespace ShogiClient
                     if (c != ' ')
                     {
                         // Offset from the center.
-                        var moveSetPositionOffset = SidedOffsetToGlobalOffset(center, new Point(x, y), piece.IsPlayerOne);
-                        var positionOnBoard = currentPosition + moveSetPositionOffset;
+                        var moveSetPositionOffset = SidedOffsetToGlobalOffset(center, new Point(x, y), piece.Data.IsPlayerOne);
+                        var positionOnBoard = piece.Position + moveSetPositionOffset;
 
                         if (board.AreIndicesWithinBounds(positionOnBoard.X, positionOnBoard.Y))
                         {
-                            var pieceAtPosition = board.GetAt(positionOnBoard.X, positionOnBoard.Y);
-                            var occupiedTile = pieceAtPosition != null && pieceAtPosition.IsPlayerOne == piece.IsPlayerOne;
+                            var pieceAtPosition = board.GetAt(positionOnBoard.X, positionOnBoard.Y).Data;
+                            var occupiedTile = pieceAtPosition != null && pieceAtPosition.IsPlayerOne == piece.Data.IsPlayerOne;
 
                             // Since there's no distant non-jumping S, we can treat them as the same.
                             if (c == 'J' || c == 'S')
@@ -292,8 +286,8 @@ namespace ShogiClient
                                     bool isValid = true;
                                     if (checkForCheck)
                                     {
-                                        var willMoveCauseCheck = WillMoveCauseCheck(piece, board, currentPosition, positionOnBoard, currentPlayer, opponentPlayer);
-                                        var willMoveCauseOpponentCheck = WillMoveCauseCheckFor(piece, board, currentPosition, positionOnBoard, opponentPlayer, currentPlayer, !piece.IsPlayerOne);
+                                        var willMoveCauseCheck = WillMoveCauseCheck(piece, board, positionOnBoard, currentPlayer, opponentPlayer);
+                                        var willMoveCauseOpponentCheck = WillMoveCauseCheckFor(piece, board, positionOnBoard, opponentPlayer, currentPlayer, !piece.Data.IsPlayerOne);
                                         if ((currentPlayer.CheckCount > 3 && willMoveCauseOpponentCheck) || willMoveCauseCheck)
                                         {
                                             isValid = false;
@@ -309,16 +303,16 @@ namespace ShogiClient
                             else if (c == 'M')
                             {
                                 var moves = RayCastPathForMovement(
-                                    currentPosition,
+                                    piece.Position,
                                     moveSetPositionOffset,
-                                    piece.IsPlayerOne,
+                                    piece.Data.IsPlayerOne,
                                     board
                                 );
                                 if (checkForCheck)
                                 {
                                     moves = moves.Where(move =>
                                     {
-                                        var willMoveCauseCheck = WillMoveCauseCheck(piece, board, currentPosition, move, currentPlayer, opponentPlayer);
+                                        var willMoveCauseCheck = WillMoveCauseCheck(piece, board, move, currentPlayer, opponentPlayer);
                                         if (currentPlayer.CheckCount > 3 && willMoveCauseCheck)
                                         {
                                             return false;
@@ -359,7 +353,7 @@ namespace ShogiClient
             // The two foreach's cannot be collapsed into ones, we need to check the whole board for columns first.
             foreach (var tile in board)
             {
-                if (tile.Content != null && tile.Content.IsPlayerOne == piece.IsPlayerOne && tile.Content.Type == PieceType.Pawn && !tile.Content.Promoted)
+                if (tile.Data != null && tile.Data.IsPlayerOne == piece.IsPlayerOne && tile.Data.Type == PieceType.Pawn && !tile.Data.Promoted)
                 {
                     pawnColumns[tile.Position.X] = true;
                 }
@@ -370,7 +364,7 @@ namespace ShogiClient
                 bool legalPosition = true;
 
                 // Can't drop on an existing piece.
-                if (tile.Content != null)
+                if (tile.Data != null)
                 {
                     legalPosition = false;
                 }
@@ -379,13 +373,13 @@ namespace ShogiClient
                 {
                     // Two pawn drop: You can't drop a pawn in a column where you already have a pawn.
                     // Mate pawn drop: You can't drop a pawn on a tile that will instantly cause a check for the opponent king.
-                    if (pawnColumns[tile.Position.X] || Utils.WillMoveCauseCheckFor(piece, board, tile.Position, tile.Position, opponentPlayer, currentPlayer, !piece.IsPlayerOne))
+                    if (pawnColumns[tile.Position.X] || Utils.WillMoveCauseCheckFor(new GridRef<PieceData> { Data = piece, Position = tile.Position }, board, tile.Position, opponentPlayer, currentPlayer, !piece.IsPlayerOne))
                     {
                         legalPosition = false;
                     }
                 }
 
-                if (Utils.WillMoveCauseCheck(piece, board, tile.Position, tile.Position, currentPlayer, opponentPlayer))
+                if (Utils.WillMoveCauseCheck(new GridRef<PieceData> { Data = piece, Position = tile.Position }, board, tile.Position, currentPlayer, opponentPlayer))
                 {
                     legalPosition = false;
                 }
@@ -411,11 +405,11 @@ namespace ShogiClient
         /// </returns>
         public static bool IsKingCheckMated(Grid<PieceData> board, bool isPlayerOne, PlayerData currentPlayer, PlayerData opponentPlayer)
         {
-            foreach (var tile in board)
+            foreach (var piece in board)
             {
-                if (tile.Content != null && tile.Content.IsPlayerOne == isPlayerOne)
+                if (piece.Data != null && piece.Data.IsPlayerOne == isPlayerOne)
                 {
-                    if (ValidMovesForPiece(tile.Content, board, tile.Position, currentPlayer, opponentPlayer).Count > 0)
+                    if (ValidMovesForPiece(piece, board, currentPlayer, opponentPlayer).Count > 0)
                     {
                         return false;
                     }
@@ -457,7 +451,6 @@ namespace ShogiClient
         /// </summary>
         /// <param name="piece">The piece to check who's move will check the king or not.</param>
         /// <param name="board">The grid that houses the pieces to check over.</param>
-        /// <param name="current">Position of the specified piece.</param>
         /// <param name="target">Position of where the specified piece will move to.</param>
         /// <param name="currentPlayer">Player data for the current player.</param>
         /// <param name="opponentPlayer">Player data for the opponent player.</param>
@@ -465,20 +458,18 @@ namespace ShogiClient
         ///   true if will check, false if not.
         /// </returns>
         public static bool WillMoveCauseCheck(
-            PieceData piece,
+            GridRef<PieceData> piece,
             Grid<PieceData> board,
-            Point current,
             Point target,
             PlayerData currentPlayer,
             PlayerData opponentPlayer)
-            => WillMoveCauseCheckFor(piece, board, current, target, currentPlayer, opponentPlayer, piece.IsPlayerOne);
+            => WillMoveCauseCheckFor(piece, board, target, currentPlayer, opponentPlayer, piece.Data.IsPlayerOne);
 
         /// <summary>
         ///   Checks if the specified move will cause a check to the player's king who's piece is being moved.
         /// </summary>
         /// <param name="piece">The piece to check who's move will check the king or not.</param>
         /// <param name="board">The grid that houses the pieces to check over.</param>
-        /// <param name="current">Position of the specified piece.</param>
         /// <param name="target">Position of where the specified piece will move to.</param>
         /// <param name="currentPlayer">Player data for the current player.</param>
         /// <param name="opponentPlayer">Player data for the opponent player.</param>
@@ -487,9 +478,8 @@ namespace ShogiClient
         ///   true if it will check, false if not.
         /// </returns>
         public static bool WillMoveCauseCheckFor(
-            PieceData piece,
+            GridRef<PieceData> piece,
             Grid<PieceData> board,
-            Point current,
             Point target,
             PlayerData currentPlayer,
             PlayerData opponentPlayer,
@@ -497,8 +487,8 @@ namespace ShogiClient
         {
             var tempBoard = board.Clone();
 
-            tempBoard.SetAt(current.X, current.Y, null);
-            tempBoard.SetAt(target.X, target.Y, piece);
+            tempBoard.SetAt(piece.Position, null);
+            tempBoard.SetAt(target, piece.Data);
 
             return IsKingChecked(tempBoard, isPlayerOne, currentPlayer, opponentPlayer);
         }
@@ -517,7 +507,7 @@ namespace ShogiClient
             {
                 for (int x = 0; x < board.Width; x++)
                 {
-                    var pieceOnBoard = board.GetAt(x, y);
+                    var pieceOnBoard = board.GetAt(x, y).Data;
                     // If there's a piece at x,y on the board, and if that piece is the players, and if that piece is a king.
                     if (pieceOnBoard != null && pieceOnBoard.IsPlayerOne == isPlayerOne && pieceOnBoard.Type == PieceType.King)
                     {
@@ -580,7 +570,7 @@ namespace ShogiClient
                     break;
                 }
 
-                var pieceAtRayPoint = board.GetAt(target.X, target.Y);
+                var pieceAtRayPoint = board.GetAt(target.X, target.Y).Data;
 
                 // If there is a piece at the raypoint and it's the current player's piece, we stop stepping
                 // If there was a piece at the previous step of the ray, we stop stepping.

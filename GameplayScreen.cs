@@ -220,7 +220,7 @@ namespace ShogiClient
                             }
 
                             var piece = State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y);
-                            turnData = new MoveTurn(piece, false, false, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
+                            turnData = new MoveTurn(piece.Data, false, false, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
                         }
                     }
                     else
@@ -231,7 +231,7 @@ namespace ShogiClient
                         }
                         else
                         {
-                            turnData = new DropTurn(State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y).Type, boardIndex.X, boardIndex.Y, false);
+                            turnData = new DropTurn(State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y).Data.Type, boardIndex.X, boardIndex.Y, false);
                         }
                     }
                 }
@@ -244,7 +244,7 @@ namespace ShogiClient
                 {
                     Resources.RandomPiecePlaceSFX.Play(0.5f, 0, 0);
 
-                    var placedPiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y);
+                    var placedPiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y).Data;
 
                     bool didPromote = false;
 
@@ -387,21 +387,21 @@ namespace ShogiClient
 
             turnTable.Draw(spriteBatch);
 
-            var tableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, false)} - Pawn
-{Utils.PieceTypeToKanji(PieceType.Bishop, true, false)} - Bishop
-{Utils.PieceTypeToKanji(PieceType.Rook, true, false)} - Rook
-{Utils.PieceTypeToKanji(PieceType.Lance, true, false)} - Lance
-{Utils.PieceTypeToKanji(PieceType.Knight, true, false)} - Knight
-{Utils.PieceTypeToKanji(PieceType.Silver, true, false)} - Silver
-{Utils.PieceTypeToKanji(PieceType.Gold, true, false)} - Gold
-{Utils.PieceTypeToKanji(PieceType.King, true, false)}/{Utils.PieceTypeToKanji(PieceType.King, false, false)} - King";
+            var tableText = $@"{Utils.PieceToKanji(new PieceData { Type = PieceType.Pawn, Promoted = false })} - Pawn
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Bishop, Promoted = false })} - Bishop
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Rook, Promoted = false })} - Rook
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Lance, Promoted = false })} - Lance
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Knight, Promoted = false })} - Knight
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Silver, Promoted = false })} - Silver
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Gold, Promoted = false })} - Gold
+{Utils.PieceToKanji(new PieceData { Type = PieceType.King, Promoted = false })}/{Utils.PieceToKanji(new PieceData { Type = PieceType.King, Promoted = false, IsPlayerOne = true })} - King";
             spriteBatch.DrawString(Resources.PieceFont, tableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 2 / 6) - Resources.PieceFont.MeasureString(tableText) / 2, Color.White);
-            var promotedTableText = $@"{Utils.PieceTypeToKanji(PieceType.Pawn, true, true)} - tokin (Promoted Pawn)
-{Utils.PieceTypeToKanji(PieceType.Bishop, true, true)} - Horse (Promoted Bishop)
-{Utils.PieceTypeToKanji(PieceType.Rook, true, true)} - Dragon (Promoted Rook)
-{Utils.PieceTypeToKanji(PieceType.Lance, true, true)} - Promoted Lance
-{Utils.PieceTypeToKanji(PieceType.Knight, true, true)} - Promoted Knight
-{Utils.PieceTypeToKanji(PieceType.Silver, true, true)} - Promoted Silver";
+            var promotedTableText = $@"{Utils.PieceToKanji(new PieceData { Type = PieceType.Pawn, Promoted = true })} - tokin (Promoted Pawn)
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Bishop, Promoted = true })} - Horse (Promoted Bishop)
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Rook, Promoted = true })} - Dragon (Promoted Rook)
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Lance, Promoted = true })} - Promoted Lance
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Knight, Promoted = true })} - Promoted Knight
+{Utils.PieceToKanji(new PieceData { Type = PieceType.Silver, Promoted = true })} - Promoted Silver";
             spriteBatch.DrawString(Resources.PieceFont, promotedTableText, new Vector2(Game.WindowSize.X / 5, Game.WindowSize.Y * 4 / 6) - Resources.PieceFont.MeasureString(promotedTableText) / 2, Color.Red);
             if (State.TurnList.Count > 0)
             {

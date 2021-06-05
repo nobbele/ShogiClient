@@ -20,7 +20,7 @@ namespace ShogiClient
         /// </summary>
         public bool PickUpPiece(Point point, bool isPlayerOne)
         {
-            var piece = Data.GetAt(point);
+            var piece = Data.GetAt(point).Data;
             if (piece == null || piece.IsPlayerOne != isPlayerOne)
                 return false;
             Data.SetAt(point, null);
@@ -35,12 +35,12 @@ namespace ShogiClient
         {
             captured = null;
 
-            if (!Utils.ValidMovesForPiece(HeldPiece, Data, from, GameplayState.CurrentPlayer, GameplayState.OpponentPlayer).Contains(target))
+            if (!Utils.ValidMovesForPiece(new GridRef<PieceData> { Data = HeldPiece, Position = from }, Data, GameplayState.CurrentPlayer, GameplayState.OpponentPlayer).Contains(target))
             {
                 return false;
             }
 
-            var piece = Data.GetAt(target);
+            var piece = Data.GetAt(target).Data;
             if (piece != null)
             {
                 captured = piece;

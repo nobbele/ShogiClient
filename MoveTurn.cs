@@ -27,14 +27,14 @@ namespace ShogiClient
 
         public string ToNotation()
             => $@"
-                {Utils.PieceTypeToNotationChar(Piece.Type, Piece.Promoted)}
+                {Utils.PieceToNotationChar(Piece)}
                 {(char)('A' + XFrom)}
                 {YFrom}
                 x
                 {(char)('A' + XTarget)}
                 {YTarget}
                 {(Captured != null
-                    ? $"*{Utils.PieceTypeToNotationChar(Captured.Type, Captured.Promoted)}"
+                    ? $"*{Utils.PieceToNotationChar(Captured)}"
                     : string.Empty
                 )}
                 {(DidPromote
