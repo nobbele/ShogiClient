@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   UI Object that renders a board with pieces and their allowed move targets.
+    /// </summary>
     public class UIMiniBoard
     {
         public Vector2 Position { get; set; }

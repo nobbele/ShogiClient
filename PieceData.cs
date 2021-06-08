@@ -1,5 +1,8 @@
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Data related to a specific piece.
+    /// </summary>
     public class PieceData
     {
         public PieceType Type { get; init; }

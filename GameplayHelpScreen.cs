@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   The help screen
+    /// </summary>
     public class GameplayHelpScreen : StatefulScreen<GameplayHelpScreenState>
     {
         // Have yet to implement a screen stack so this will have to do for now

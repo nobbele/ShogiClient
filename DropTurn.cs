@@ -1,5 +1,8 @@
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Data related to a turn in which the player dropped a piece from their hand.
+    /// </summary>
     public class DropTurn : ITurn
     {
         public PieceType Type { get; set; }

@@ -3,6 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   UI Object that renders a rectangle with a color.
+    /// </summary>
     public class UIPanel
     {
         public Vector2 Position { get; set; }

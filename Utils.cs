@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Utility functions to perform convert and calculate various things.
+    /// </summary>
     public static class Utils
     {
         /// <summary>

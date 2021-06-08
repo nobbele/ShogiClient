@@ -3,6 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Help Page 2
+    /// </summary>
     public class HelpPage2 : HelpPage
     {
         private UIMiniBoard lanceBoard;

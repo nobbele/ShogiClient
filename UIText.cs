@@ -3,6 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   UI Object that renders Text, horizontally and vertically centered.
+    /// </summary>
     public class UIText
     {
         public Vector2 Position { get; set; }

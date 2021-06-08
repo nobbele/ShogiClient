@@ -6,6 +6,9 @@ using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Manages the current screen, states, rendering and other things.
+    /// </summary>
     public class Game1 : Game
     {
         public const bool DEBUG_PLAYERONE = false;
@@ -50,7 +53,6 @@ namespace ShogiClient
             MediaPlayer.Volume = 0.05f;
 
             SetCurrentScreen(new MainMenuScreen(this));
-            //SetCurrentScreen(new GameplayScreen(this));
 
             base.Initialize();
         }

@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   UI Object that renders and allows the user to slide a value.
+    /// </summary>
     public class UISlider
     {
         public Vector2 Position { get; set; }

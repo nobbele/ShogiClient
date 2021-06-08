@@ -6,6 +6,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   An object that contains properties and methods used to be able to draw board used for gameplay.
+    /// </summary>
     public class DrawableBoard
     {
         public Vector2 Position { get; set; }

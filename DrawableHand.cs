@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   An object that contains properties and methods used to be able to draw the hand of a player. Max 19 items.
+    /// </summary>
     public class DrawableHand
     {
         public PlayerData PlayerData { get; init; }

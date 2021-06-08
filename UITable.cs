@@ -6,21 +6,40 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   UI Object that renders a table with a specified width and height.
+    /// </summary>
     public class UITable
     {
         public Vector2 Position { get; set; }
         public Vector2 Size { get; set; }
         public Color PanelColor { get; set; } = new Color(Color.Black, 0.6f);
         public Color BorderColor { get; set; } = Color.White;
+        /// <summary>
+        ///   The height of a single table entry
+        /// </summary>
         public int EntryHeight;
 
         private int scrolledAmount = 0;
-        public int ScrolledAmount { get => ClampScroll(scrolledAmount); set => scrolledAmount = ClampScroll(value); }
+        /// <summary>
+        ///   How many entries the table has been scrolled by
+        /// </summary>
+        public int ScrolledAmount
+        {
+            get => ClampScroll(scrolledAmount);
+            set => scrolledAmount = ClampScroll(value);
+        }
+        /// <summary>
+        ///   Computes the lower and upper bound of the amount of entries you can scroll and sets v to be within that.
+        /// </summary>
         private int ClampScroll(int v)
         {
             return MathHelper.Clamp(v, 0, MathHelper.Max(0, ((int)MathF.Ceiling(Data.Count / 2.0f)) - entryVerticalCount));
         }
 
+        /// <summary>
+        ///   Width of the entire table
+        /// </summary>
         public int TableWidth { get; set; }
         public List<string> Data { get; } = new List<string>();
 
@@ -54,12 +73,17 @@ namespace ShogiClient
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            // Draws the border
             spriteBatch.Draw(tex, new Rectangle((Position - Size / 2).ToPoint(), Size.ToPoint()), null, PanelColor);
-            for (int i = 0; i < Math.Min(entryVerticalCount * 2, Data.Count - (ScrolledAmount * 2)); i++)
+            // i will iterate from 0 to either the max amount of entries or to the amount of entries currently visible by the scrolled amount
+            for (int i = 0; i < Math.Min(entryVerticalCount * entryHorizontalCount, Data.Count - (ScrolledAmount * entryHorizontalCount)); i++)
             {
-                var entryData = Data[(ScrolledAmount * 2) + i];
+                // Adds i to the index to the first row that has been scrolled to
+                var entryData = Data[(ScrolledAmount * entryHorizontalCount) + i];
                 if (entryData != null)
                 {
+                    // Calculate the position of the entry by taking the position of the board added with the index times the dimensions
+                    // and then adds centering with respective to different componenets.
                     var entryPosition = new Vector2(Position.X + entryHorizontalCount * (i % TableWidth), Position.Y + EntryHeight * (i / TableWidth))
                         + new Vector2(entryHorizontalCount / 2, EntryHeight / 2)
                         - resources.PieceFont.MeasureString(entryData) / 2
@@ -68,6 +92,7 @@ namespace ShogiClient
                 }
             }
 
+            // Draws the horizontal lines
             for (int y = 0; y < entryVerticalCount; y++)
             {
                 var horLinePosition = new Vector2(Position.X, Position.Y + EntryHeight * y)
@@ -75,6 +100,7 @@ namespace ShogiClient
                 spriteBatch.Draw(tex, new Rectangle(horLinePosition.ToPoint(), new Point(entryHorizontalCount * 2, 1)), null, BorderColor);
             }
 
+            // Draws the vertical line (assumed to have 2 horizontal items, it's more complicated to solve the general case).
             var verLinePosition = new Vector2(Position.X + entryHorizontalCount, Position.Y)
                 - Size / 2;
             spriteBatch.Draw(tex, new Rectangle(verLinePosition.ToPoint(), new Point(1, (int)Size.Y)), null, BorderColor);

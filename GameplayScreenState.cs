@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   The state for the GameplayScreen
+    /// </summary>
     public class GameplayScreenState : ScreenState
     {
         public PlayerData CurrentPlayer => IsPlayerOneTurn ? PlayerOne : PlayerTwo;

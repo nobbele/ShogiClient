@@ -5,6 +5,9 @@ using Newtonsoft.Json;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   A grid is a two dimensional collection type.
+    /// </summary>
     [JsonObject]
     public class Grid<T> : IEnumerable<GridRef<T>>
     {

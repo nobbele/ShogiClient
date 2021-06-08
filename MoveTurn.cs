@@ -2,6 +2,9 @@ using System;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Contains data about a turn where the player moved their piece.
+    /// </summary>
     public class MoveTurn : ITurn
     {
         public PieceData Piece { get; set; }

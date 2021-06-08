@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   The state and data used for DrawableBoard.
+    /// </summary>
     public class Board
     {
         public Grid<PieceData> Data { get; private set; }

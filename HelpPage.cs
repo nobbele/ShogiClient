@@ -2,6 +2,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Help Page base class.
+    /// </summary>
     public abstract class HelpPage
     {
         public GameResources Resources { get; set; }

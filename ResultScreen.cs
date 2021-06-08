@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   The screen that is displayed after someone has won
+    /// </summary>
     public class ResultScreen : Screen
     {
         // Have yet to implement a screen stack so this will have to do for now

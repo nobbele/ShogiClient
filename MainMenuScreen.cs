@@ -7,6 +7,9 @@ using Newtonsoft.Json;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   The screen displayed when the user boots up the game
+    /// </summary>
     public class MainMenuScreen : StatefulScreen<MainMenuScreenState>
     {
         private UIButton startGameButton;

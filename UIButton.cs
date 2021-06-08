@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   UI Object that renders a button the user can click.
+    /// </summary>
     public class UIButton
     {
         public Vector2 Position { get; set; }

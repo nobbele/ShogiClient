@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Options screen that can go back to the previous screen.
+    /// </summary>
     public class OptionsScreen<TState> : Screen
         where TState : ScreenState
     {

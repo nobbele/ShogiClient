@@ -6,6 +6,9 @@ using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Resources used in the game
+    /// </summary>
     public class GameResources
     {
         public Texture2D Logo;

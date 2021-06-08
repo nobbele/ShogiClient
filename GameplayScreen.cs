@@ -6,6 +6,9 @@ using Microsoft.Xna.Framework.Media;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   The screen used for actual gameplay.
+    /// </summary>
     public class GameplayScreen : StatefulScreen<GameplayScreenState>
     {
         private DrawableBoard board;

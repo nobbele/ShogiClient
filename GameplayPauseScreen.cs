@@ -7,6 +7,9 @@ using Newtonsoft.Json;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Screen used when pausing during gameplay
+    /// </summary>
     public class GameplayPauseScreen : Screen
     {
         // Have yet to implement a screen stack so this will have to do for now
