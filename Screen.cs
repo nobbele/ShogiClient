@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ShogiClient
 {
+    /// <summary>
+    ///   Base class that provides the user acess to game resources, prespecified parameters and polymorphism.
+    /// </summary>
     public abstract class Screen
     {
         public Game1 Game { get; private set; }
