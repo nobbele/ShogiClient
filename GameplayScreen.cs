@@ -154,10 +154,12 @@ namespace ShogiClient
 
             var boardIndex = board.GetTileForCoordinate(mousePosition);
             var currentHandIndex = currentPlayerHand.GetIndexForCoordinate(mousePosition);
+            // If the player just clicked the left button and if he is not holding anything.
             if ((mouseState.LeftButton == ButtonState.Pressed || mouseState.RightButton == ButtonState.Pressed) && board.State.HeldPiece == null)
             {
                 bool failedToPick = true;
 
+                // Checks if the piece is within the bounds of the board and is allowed to be picked up by them.
                 if (
                     boardIndex.X >= 0 && boardIndex.X < board.State.Data.Width
                     && boardIndex.Y >= 0 && boardIndex.Y < board.State.Data.Height)
@@ -168,8 +170,9 @@ namespace ShogiClient
                         failedToPick = false;
                     }
                 }
-                else
+                else // If the piece is not on the board it might be on the hand.
                 {
+                    // Checks if the piece is within the bounds of their hand, if so it will pick it up from there.
                     if (currentHandIndex.X >= 0 && currentHandIndex.X < State.CurrentPlayer.Hand.Count
                     && currentHandIndex.Y == 0)
                     {
@@ -187,6 +190,7 @@ namespace ShogiClient
                     }
                 }
 
+                // Play a sound effect if the piece was picked up.
                 if (!failedToPick)
                 {
                     Resources.RandomPiecePickSFX.Play(0.5f, 0, 0);
@@ -196,37 +200,44 @@ namespace ShogiClient
             var leftMouseButtonReleased = (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed);
             var rightMouseButtonReleased = mouseState.RightButton == ButtonState.Released && prevMouseState.RightButton == ButtonState.Pressed;
 
+            // If the player just released the left (normal drop) or the right (promotion drop) mouse button and that they are holding a piece.
             if ((leftMouseButtonReleased || rightMouseButtonReleased) && board.State.HeldPiece != null)
             {
                 bool failedToPlace = false;
                 var tryPromote = false;
                 ITurn turnData = null;
 
+                // Checks if the dropped piece is within the bounds of the board.
                 if (board.State.Data.AreIndicesWithinBounds(boardIndex.X, boardIndex.Y))
                 {
+                    // Checks if the piece was picked up from the board
                     if (board.State.HeldPiecePickUpPosition is Point pickUpPosition)
                     {
+                        // Checks if the piece is allowed to be placed and that positions.
                         if (!board.State.PlacePiece(pickUpPosition, boardIndex, out PieceData captured))
                         {
                             failedToPlace = true;
                         }
                         else
                         {
+                            // If a piece was captured, it will be added to the hand.
                             if (captured != null)
                             {
                                 State.CurrentPlayer.Hand.Add(captured.Type);
                             }
 
+                            // If the player used right mouse button release, the piece will be attempted to be promoted.
                             if (rightMouseButtonReleased)
                             {
                                 tryPromote = true;
                             }
 
+                            // Specifies the data used for this move turn.
                             var piece = State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y);
                             turnData = new MoveTurn(piece.Data, false, false, pickUpPosition.X, pickUpPosition.Y, boardIndex.X, boardIndex.Y, captured);
                         }
                     }
-                    else
+                    else // Or if it was picked up from the hand
                     {
                         if (!board.State.PlacePieceFromHand(boardIndex))
                         {
@@ -234,6 +245,7 @@ namespace ShogiClient
                         }
                         else
                         {
+                            // Specifies the data used for this drop turn.
                             turnData = new DropTurn(State.BoardState.Data.GetAt(boardIndex.X, boardIndex.Y).Data.Type, boardIndex.X, boardIndex.Y, false);
                         }
                     }
@@ -243,6 +255,7 @@ namespace ShogiClient
                     failedToPlace = true;
                 }
 
+                // If the piece was successfully placed.
                 if (!failedToPlace)
                 {
                     Resources.RandomPiecePlaceSFX.Play(0.5f, 0, 0);
@@ -250,6 +263,8 @@ namespace ShogiClient
                     var placedPiece = board.State.Data.GetAt(boardIndex.X, boardIndex.Y).Data;
 
                     bool didPromote = false;
+
+                    // We will calculate the rows in which the player is allowed to promote on. The promotion zone.
 
                     // Third last and third row respectively
                     var firstPromotionRow = State.IsPlayerOneTurn ? 2 : board.State.Data.Height - 3;
@@ -259,6 +274,7 @@ namespace ShogiClient
                         indexToPromotionRow = -indexToPromotionRow;
                     }
 
+                    // The pawn, lance and knight will be forcefully promoted as they can't move otherwise.
                     if (placedPiece.Type == PieceType.Pawn || placedPiece.Type == PieceType.Lance)
                     {
                         if (boardIndex.Y == (State.IsPlayerOneTurn ? 0 : board.State.Data.Height - 1))
@@ -276,6 +292,7 @@ namespace ShogiClient
 
                     if (tryPromote)
                     {
+                        // Checks if the piece is within range of the promotion zone.
                         if (indexToPromotionRow >= 0)
                         {
                             var promotePiece = placedPiece;
@@ -289,6 +306,7 @@ namespace ShogiClient
 
                     EndOfTurn();
 
+                    // If there was a successful turn, add that data to the turn and turn table lists.
                     if (turnData != null)
                     {
                         turnData.DidCheck = State.IsCheck;
@@ -301,6 +319,7 @@ namespace ShogiClient
                         State.TurnList.Add(turnData);
                     }
 
+                    // If the previous move caused a check mate, go to the result screen.
                     if (State.IsCheckMate)
                     {
                         var currentGraphic = Game.Screenshot();
@@ -308,7 +327,7 @@ namespace ShogiClient
                         return;
                     }
                 }
-                else
+                else // If the piece was not successfully placed, it will go back to it's origin.
                 {
                     if (board.State.HeldPiecePickUpPosition is Point pickUpPosition)
                     {
@@ -348,6 +367,7 @@ namespace ShogiClient
             turnTable.Update(gameTime, keyboardState, mouseState, prevMouseState);
         }
 
+        // Sets various data at the end of the turn.
         public void EndOfTurn()
         {
             State.IsPlayerOneTurn = !State.IsPlayerOneTurn;
